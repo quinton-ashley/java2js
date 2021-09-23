@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>java2js test</title>
+		<style>
+			body,
+			textarea {
+				background: #000;
+				color: #eee;
+			}
+
+			textarea {
+				-moz-tab-size: 2;
+				-o-tab-size: 2;
+				tab-size: 2;
+			}
+
+			#javaFile {
+				width: 47vw;
+				height: 90vh;
+			}
+
+			#javaConsole {
+				width: 47vw;
+				height: 90vh;
+			}
+		</style>
+	</head>
+
+	<body>
+		<textarea id="javaFile" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+		<textarea id="javaConsole" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+		<script type="text/javascript" src="jre.js"></script>
+		<script type="text/javascript" src="ide.js"></script>
+		<script type="text/javascript" src="transpiler.js"></script>
+	</body>
+</html>

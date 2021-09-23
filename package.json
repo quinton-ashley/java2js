@@ -1,0 +1,24 @@
+{
+	"name": "java2js",
+	"version": "1.0.1",
+	"description": "Converts Java to JavaScript with support for p5.js and QuintOS.",
+	"main": "java2js.js",
+	"scripts": {
+		"start": "open demo.html",
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"v": "npm version patch --force",
+		"V": "npm version minor --force",
+		"version": "git add -A",
+		"postversion": "git push"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/quinton-ashley/java2js.git"
+	},
+	"author": "quinton-ashley",
+	"license": "GPL-3.0-only",
+	"bugs": {
+		"url": "https://github.com/quinton-ashley/java2js/issues"
+	},
+	"homepage": "https://github.com/quinton-ashley/java2js#readme"
+}
