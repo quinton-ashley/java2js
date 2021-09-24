@@ -1,4 +1,4 @@
-jdk.imports['java.util.Random'].load = () => {
+jdk.imports['java.util.Random'].load = async () => {
 	class Random {
 		constructor() {
 			this.seed = undefined;

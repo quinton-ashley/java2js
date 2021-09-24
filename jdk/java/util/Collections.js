@@ -1,4 +1,4 @@
-jdk.imports['java.util.Collections'].load = () => {
+jdk.imports['java.util.Collections'].load = async () => {
 	class Collections {
 		sort(list) {
 			if (!list.size()) return;

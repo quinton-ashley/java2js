@@ -45,7 +45,9 @@
 
 				/* JDK implementation in modern JavaScript */
 				class JDK {
-					constructor() {
+					constructor() {}
+
+					async init() {
 						this.java = {};
 						let pkgs = ['com', 'lang', 'org', 'io', 'util'];
 						for (let pkg of pkgs) {
@@ -76,50 +78,23 @@
 							for (let name of names) {
 								lang.push('java.lang.' + name);
 							}
-							this.import(lang);
+							await this.import(lang);
 						} catch (e) {}
 
 						// stub main for now
 						this.main = () => {};
-
-						this.load();
 					}
 
-					load() {
-						let ready = 0;
-						// load all imported classes
-						for (let className in this.imports) {
-							let imp = this.imports[className];
-							if (imp.classPath) {
-								imp.classPath = className.split('.');
-							}
-							if (imp.ready) {
-								ready++;
-								continue;
-							}
-							if (imp.load) {
-								try {
-									imp.load();
-								} catch (e) {
-									console.log(e);
-									continue;
-								}
-								imp.load = null;
-								imp.ready = true;
-								ready++;
-							}
-						}
-						// some classes may load slower than others,
-						// wait for them all before launching the Java program
-						if (ready != Object.keys(this.imports).length) {
-							let _this = this;
-							setTimeout(() => {
-								_this.load();
-							}, 100);
-						} else {
-							this.launch();
-						}
-					}
+					// async load() {
+					// 	// load all imported classes
+					// 	for (let className in this.imports) {
+					// 		let imp = this.imports[className];
+					// 		imp.classPath ??= className.split('.');
+					// 		await imp.load();
+					// 	}
+
+					// 	this.launch();
+					// }
 
 					launch() {
 						// make java.lang classes global
@@ -144,15 +119,15 @@
 						return _class;
 					}
 
-					import(classNames) {
+					async import(classNames) {
 						if (!classNames) return;
 						if (typeof classNames == 'string') {
 							classNames = [classNames];
 						}
 
-						let ready = 0;
-
+						let classes = [];
 						for (let className of classNames) {
+							log('importing ' + className);
 							let imp = this.imports[className];
 							if (imp) {
 								// class is ready for use
@@ -170,51 +145,35 @@
 							}
 							src += '.js';
 
-							const getJS = new Promise((resolve, reject) => {
-								const script = document.createElement('script');
-								document.body.appendChild(script);
-								script.onload = resolve;
-								script.onerror = reject;
-								script.async = true;
-								script.src = src;
-							});
+							const loadJS = () => {
+								return new Promise((resolve, reject) => {
+									const script = document.createElement('script');
+									document.body.appendChild(script);
+									script.onload = resolve;
+									script.onerror = reject;
+									script.async = true;
+									script.src = src;
+								});
+							};
 
-							getJS.then(() => {});
-						}
+							await loadJS();
 
-						if (ready != classNames.length) {
-							throw 'loading java classes';
-						}
+							await imp.load();
 
-						let classes = [];
-						for (let className of classNames) {
-							let imp = this.imports[className];
 							classes.push(this.getClass(imp.classPath));
 						}
-						if (classNames.length == 1) {
-							classes = classes[0];
-						}
+
+						if (classNames.length == 1) classes = classes[0];
 						return classes;
 					}
 
-					run(file) {
+					async run(file) {
 						let classLine = file.indexOf('public class');
 						let imports = file.slice(0, classLine);
 						imports = imports.match(/(?<=^import )[^;]*/gm) || [];
 
 						let userName = window?.QuintOS?.userName || 'quinton-ashley';
 						let className = file.slice(classLine + 13, file.indexOf(' {', classLine + 13));
-
-						let prefix = `(jdk.imports['com.${userName}.${className}'] = {}).load = () => {\n\n`;
-
-						// handle Java class imports
-						for (let i = 0; i < imports.length; i++) {
-							let imp = imports[i];
-							let impPath = imp.split('.');
-							let impName = impPath[impPath.length - 1];
-							prefix += `let ${impName} = jdk.import('${imp}');\n`;
-						}
-						prefix += '\n';
 
 						// hacky support for Java 15 triple quotes
 						file = file.replaceAll(/"""([^"]*)"""/g, (match, str) => {
@@ -234,8 +193,6 @@
 
 						// log(file);
 
-						let suffix = `\njdk.main = ${className}.main;\n}`;
-
 						window.file0 = file;
 
 						let trans = java_to_javascript(file);
@@ -245,14 +202,27 @@
 						trans = trans.replace(/(\([^\)]*\) =>)/gm, 'async $1');
 						trans = trans.replace(/([\w_\$]+\.next(Int|Float|Double|Line|Short|Long)*\(\))/gm, 'await $1');
 
+						let prefix = `((jdk.imports['com.${userName}.${className}'] = {}).load = async () => {\n\n`;
+
+						// handle Java class imports
+						for (let i = 0; i < imports.length; i++) {
+							let imp = imports[i];
+							let impPath = imp.split('.');
+							let impName = impPath[impPath.length - 1];
+							prefix += `let ${impName} = await jdk.import('${imp}');\n`;
+						}
+						prefix += '\n';
+
+						let suffix = `\njdk.main = ${className}.main;\njdk.launch();\n})();`;
+
 						trans = prefix + trans + suffix;
 
 						log(trans);
 
 						try {
 							eval(trans);
-							this.load();
 						} catch (e) {
+							console.error(e);
 							if (window?.ide) ide.log.value += e;
 						}
 					}

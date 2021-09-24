@@ -1,4 +1,4 @@
-jdk.imports['java.lang.Long'].load = () => {
+jdk.imports['java.lang.Long'].load = async () => {
 	class Long {}
 	Long.parseLong = (d) => {
 		return parseInt(d);

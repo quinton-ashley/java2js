@@ -1,5 +1,5 @@
-jdk.imports['java.util.Formatter'].load = () => {
-	const IllegalFormatException = jdk.import('java.util.IllegalFormatException');
+jdk.imports['java.util.Formatter'].load = async () => {
+	const IllegalFormatException = await jdk.import('java.util.IllegalFormatException');
 
 	class Formatter {
 		format(format, ...args) {

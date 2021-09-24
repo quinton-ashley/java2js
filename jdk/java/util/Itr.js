@@ -1,4 +1,4 @@
-jdk.imports['java.util.Itr'].load = () => {
+jdk.imports['java.util.Itr'].load = async () => {
 	class Itr {
 		constructor(list) {
 			this.cursor = 0;

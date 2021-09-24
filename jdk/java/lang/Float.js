@@ -1,4 +1,4 @@
-jdk.imports['java.lang.Float'].load = () => {
+jdk.imports['java.lang.Float'].load = async () => {
 	class Float {}
 	Float.parseFloat = (d) => {
 		return parseFloat(d);

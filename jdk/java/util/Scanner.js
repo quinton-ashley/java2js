@@ -1,5 +1,5 @@
-jdk.imports['java.util.Scanner'].load = () => {
-	const File = jdk.import('java.io.File');
+jdk.imports['java.util.Scanner'].load = async () => {
+	const File = await jdk.import('java.io.File');
 
 	class Scanner {
 		constructor(input) {

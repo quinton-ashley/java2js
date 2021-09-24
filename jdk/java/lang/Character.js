@@ -1,4 +1,4 @@
-jdk.imports['java.lang.Character'].load = () => {
+jdk.imports['java.lang.Character'].load = async () => {
 	class Character {}
 	Character.isDigit = (c) => {
 		c = c.charCodeAt(0);

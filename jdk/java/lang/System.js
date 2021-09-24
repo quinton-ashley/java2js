@@ -1,7 +1,7 @@
-jdk.imports['java.lang.System'].load = () => {
-	const Formatter = jdk.import('java.util.Formatter');
-	const InputStream = jdk.import('java.io.InputStream');
-	const PrintStream = jdk.import('java.io.PrintStream');
+jdk.imports['java.lang.System'].load = async () => {
+	const Formatter = await jdk.import('java.util.Formatter');
+	const InputStream = await jdk.import('java.io.InputStream');
+	const PrintStream = await jdk.import('java.io.PrintStream');
 
 	class System {}
 

@@ -1,4 +1,4 @@
-jdk.imports['java.util.Arrays'].load = () => {
+jdk.imports['java.util.Arrays'].load = async () => {
 	class Arrays {
 		fill(data, begin, nbElem, param) {
 			const max = begin + nbElem;

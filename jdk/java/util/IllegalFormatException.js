@@ -1,4 +1,4 @@
-jdk.imports['java.util.IllegalFormatException'].load = () => {
+jdk.imports['java.util.IllegalFormatException'].load = async () => {
 	// TODO import and extend exception
 
 	class IllegalFormatException {

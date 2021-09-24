@@ -1,4 +1,4 @@
-jdk.imports['java.lang.StringBuilder'].load = () => {
+jdk.imports['java.lang.StringBuilder'].load = async () => {
 	class StringBuilder {
 		constructor() {
 			this._str = '';

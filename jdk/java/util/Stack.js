@@ -1,4 +1,4 @@
-jdk.imports['java.util.Stack'].load = () => {
+jdk.imports['java.util.Stack'].load = async () => {
 	class Stack {
 		constructor() {
 			this.content = new Array();

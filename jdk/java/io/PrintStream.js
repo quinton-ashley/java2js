@@ -1,4 +1,4 @@
-jdk.imports['java.io.PrintStream'].load = () => {
+jdk.imports['java.io.PrintStream'].load = async () => {
 	class PrintStream {
 		constructor() {
 			this.log = '';

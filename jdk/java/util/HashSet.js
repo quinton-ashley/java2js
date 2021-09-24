@@ -1,4 +1,4 @@
-jdk.imports['java.util.HashSet'].load = () => {
+jdk.imports['java.util.HashSet'].load = async () => {
 	class HashSet {
 		constructor() {
 			this.content = {};

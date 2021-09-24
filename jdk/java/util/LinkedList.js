@@ -1,5 +1,5 @@
-jdk.imports['java.util.LinkedList'].load = () => {
-	let AbstractList = jdk.import('java.util.AbstractList');
+jdk.imports['java.util.LinkedList'].load = async () => {
+	let AbstractList = await jdk.import('java.util.AbstractList');
 
 	class LinkedList extends AbstractList {
 		constructor(...args) {

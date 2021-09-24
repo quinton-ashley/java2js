@@ -1,4 +1,4 @@
-jdk.imports['java.lang.Double'].load = () => {
+jdk.imports['java.lang.Double'].load = async () => {
 	class Double {
 		constructor() {
 			throw 'new Double() not supported';

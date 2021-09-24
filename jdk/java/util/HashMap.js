@@ -1,4 +1,4 @@
-jdk.imports['java.util.HashMap'].load = () => {
+jdk.imports['java.util.HashMap'].load = async () => {
 	class HashMap {
 		constructor() {
 			this.content = {};

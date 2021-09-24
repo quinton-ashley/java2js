@@ -1,4 +1,4 @@
-jdk.imports['java.io.InputStream'].load = () => {
+jdk.imports['java.io.InputStream'].load = async () => {
 	class InputStream {
 		constructor() {
 			this.reset();

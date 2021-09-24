@@ -1,4 +1,4 @@
-jdk.imports['java.lang.String'].load = () => {};
+jdk.imports['java.lang.String'].load = async () => {};
 // String is special, I just extended js String prototype
 String.prototype.hashCode = () => {
 	let h = this._hashCode;

@@ -1,5 +1,5 @@
-jdk.imports['java.util.AbstractList'].load = () => {
-	const Itr = jdk.import('java.util.Itr');
+jdk.imports['java.util.AbstractList'].load = async () => {
+	const Itr = await jdk.import('java.util.Itr');
 
 	class AbstractList {
 		constructor() {

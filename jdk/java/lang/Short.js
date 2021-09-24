@@ -1,4 +1,4 @@
-jdk.imports['java.lang.Short'].load = () => {
+jdk.imports['java.lang.Short'].load = async () => {
 	class Short {}
 	Short.parseShort = (d) => {
 		return parseInt(d);

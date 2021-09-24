@@ -1,4 +1,4 @@
-jdk.imports['java.io.File'].load = () => {
+jdk.imports['java.io.File'].load = async () => {
 	class File {
 		constructor(file) {
 			this.absPath = file;

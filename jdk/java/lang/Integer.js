@@ -1,4 +1,4 @@
-jdk.imports['java.lang.Integer'].load = () => {
+jdk.imports['java.lang.Integer'].load = async () => {
 	class Integer {}
 	Integer.parseInt = (d) => {
 		return parseInt(d);
