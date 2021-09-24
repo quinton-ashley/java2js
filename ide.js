@@ -5,5 +5,5 @@ ide.file0 = document.getElementById('javaFile');
 ide.file0.onchange = () => {
 	ide.log.value = '';
 	let file = ide.file0.value;
-	jre.run(file);
+	jdk.run(file);
 };
