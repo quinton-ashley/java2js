@@ -3,9 +3,11 @@ jre.imports['java.io.InputStream'].load = () => {
 		constructor() {
 			this.reset();
 			let _this = this;
-			java.log.onkeyup = () => {
-				_this.stream = java.log.value;
-			};
+			if (window?.ide) {
+				ide.log.onkeyup = () => {
+					_this.stream = ide.log.value;
+				};
+			}
 		}
 		reset() {
 			this.stream = '';

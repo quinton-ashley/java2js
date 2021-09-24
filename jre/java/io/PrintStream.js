@@ -16,8 +16,8 @@ jre.imports['java.io.PrintStream'].load = () => {
 		print(arg) {
 			let str = arg.toString();
 			this.log += str;
-			if (java.log) {
-				java.log.value += str;
+			if (window?.ide) {
+				ide.log.value += str;
 				this._onPrint(str.length);
 			}
 		}
@@ -25,8 +25,8 @@ jre.imports['java.io.PrintStream'].load = () => {
 		println(arg) {
 			let str = arg.toString() + '\n';
 			this.log += str;
-			if (java.log) {
-				java.log.value += str;
+			if (window?.ide) {
+				ide.log.value += str;
 				this._onPrint(str.length);
 			}
 		}
@@ -34,8 +34,8 @@ jre.imports['java.io.PrintStream'].load = () => {
 		printf(format, ...args) {
 			let str = new Formatter().format(format, args);
 			this.log += str;
-			if (java.log) {
-				java.log.value += str;
+			if (window?.ide) {
+				ide.log.value += str;
 				this._onPrint(str.length);
 			}
 		}

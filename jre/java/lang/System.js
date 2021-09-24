@@ -29,7 +29,7 @@ jre.imports['java.lang.System'].load = () => {
 	};
 	System.exit = (code) => {
 		console.log('Exited with code: ' + code);
-		if (window.exit) exit();
+		if (window?.exit) exit();
 	};
 	jre.java.lang.System = System;
 };
