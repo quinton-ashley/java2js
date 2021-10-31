@@ -127,7 +127,7 @@
 
 						let classes = [];
 						for (let className of classNames) {
-							log('importing ' + className);
+							// log('importing ' + className);
 							let imp = this.imports[className];
 							if (imp) {
 								// class is ready for use
@@ -175,7 +175,7 @@
 						let userName = window?.QuintOS?.userName || 'quinton-ashley';
 						let className = file.slice(classLine + 13, file.indexOf(' {', classLine + 13));
 
-						// hacky support for Java 15 triple quotes
+						// workaround hack for converting triple quotes to a normal string
 						file = file.replaceAll(/"""([^"]*)"""/g, (match, str) => {
 							str = str.replaceAll(/(.*)(\n|$)/g, '"$1\\n"+').slice(0, -1);
 							return str;
@@ -184,6 +184,18 @@
 						// hacky support for Array literals
 						file = file.replaceAll(/=\s*new \w*\[\]\s*\{/g, '= {');
 
+						// workaround hack for converting lambda expressions to Runnables
+						let lambdaRegex = /\(\)\s*\->\s*\{(([^\{\}]*\{[^\}]*\})*[^\}]*)\}/g;
+						file = file.replaceAll(lambdaRegex, (match, in0) => {
+							log(in0);
+							if (lambdaRegex.test(in0)) {
+								in0 = in0.replaceAll(lambdaRegex, (match, in1) => {
+									return 'new Runnable() {\n@Override\npublic void run() {' + in1 + '}}';
+								});
+							}
+							return 'new Runnable() {\n@Override\npublic void run() {' + in0 + '}}';
+						});
+
 						// convert string .length() method
 						file = file.replaceAll(/\.length\(\)/g, '.length');
 
@@ -191,9 +203,7 @@
 						file = file.replace(/\(int\)\s*/gm, 'Math.floor');
 						file = file.replace(/\(int\)\s*\-/gm, 'Math.ceil');
 
-						// log(file);
-
-						window.file0 = file;
+						log(file);
 
 						let trans = java_to_javascript(file);
 
@@ -202,14 +212,20 @@
 						trans = trans.replace(/(\([^\)]*\) =>)/gm, 'async $1');
 						trans = trans.replace(/([\w_\$]+\.next(Int|Float|Double|Line|Short|Long)*\(\))/gm, 'await $1');
 
-						let prefix = `((jdk.imports['com.${userName}.${className}'] = {}).load = async () => {\n\n`;
+						let prefix = `((jdk.imports['games_java.${className}'] = {}).load = async () => {\n\n`;
 
 						// handle Java class imports
 						for (let i = 0; i < imports.length; i++) {
 							let imp = imports[i];
+							// skip static imports for now (like QuintOS)
+							if (imp.includes('static')) continue;
 							let impPath = imp.split('.');
 							let impName = impPath[impPath.length - 1];
-							prefix += `let ${impName} = await jdk.import('${imp}');\n`;
+							if (impName == '*') {
+								prefix += `await jdk.import('${imp}');\n`;
+							} else {
+								prefix += `let ${impName} = await jdk.import('${imp}');\n`;
+							}
 						}
 						prefix += '\n';
 
@@ -243,8 +259,6 @@
 						? define(factory)
 						: ((global = global || self), (global.javaToJavascript = factory()));
 				})(this, function () {
-					'use strict';
-
 					function unwrapExports(x) {
 						return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x.default : x;
 					}
@@ -19405,7 +19419,7 @@
 					 * @return {string} - Converted JavaScript
 					 */
 					const javaToJavascript = (javaString, options = {}, progress) => {
-						if (typeof javaString !== 'string') throw new Error('java-to-javascript: First argument must be a string');
+						if (typeof javaString !== 'string') throw 'java-to-javascript: First argument must be a string';
 
 						// Reset opts parameters
 						Object.assign(opts, DEFAULT_OPTIONS);
@@ -19426,7 +19440,8 @@
 						try {
 							javaAST$$1 = javaAST.parse(javaString);
 						} catch (e) {
-							if (e.location) throw new Error(`Line ${e.location.start.line}\n\n${e.stack}`);
+							let line = e.location.start.line;
+							if (e.location) throw `on line ${line}: \n\n${javaString.split('\n')[line - 1].trim()}\n\n${e.stack}`;
 							else throw e;
 						}
 

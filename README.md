@@ -1,8 +1,8 @@
 # Java to Javascript for QuintOS
 
-I've built on top of the "Java to Javascript" transpiler by @wyattades and got inspiration from the JavaDevelopmentKit implementation in "java2javascript" by @BobHanson and others.
+I've built on top of the [java-to-javascript](https://github.com/wyattades/java-to-javascript) transpiler by @wyattades and got inspiration from the JDK (Java Development Kit) implementation in [java2javascript](https://github.com/java2script/java2script) by @BobHanson, @zhourenjian, @abego, and others.
 
-The purpose of this project was to allow intro level CS students to write Java code but still use my QuintOS library which is web based instead of just having them run their programs in a Java console which is boring. I made a barebones JavaDevelopmentKit implementation in modern Javascript to acheive this.
+My purpose in creating this project is to allow intro level CS students to write Java code but still use my QuintOS library which is web based. Yes, I went to all this trouble just so some teenagers don't have to run their programs in a boring Java console! I made a barebones JDK implementation in modern Javascript to acheive this.
 
 ## Known limitations
 
