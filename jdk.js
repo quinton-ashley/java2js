@@ -47,7 +47,8 @@
 				class JDK {
 					constructor() {}
 
-					async init() {
+					async init(root) {
+						this.root = root || '.';
 						this.java = {};
 						let pkgs = ['com', 'lang', 'org', 'io', 'util'];
 						for (let pkg of pkgs) {
@@ -81,6 +82,15 @@
 							await this.import(lang);
 						} catch (e) {}
 
+						// make java.lang classes global
+						for (let name in this.java.lang) {
+							if (name == 'String') continue;
+							window[name] = this.java.lang[name];
+						}
+
+						System.in.reset();
+						System.out.reset();
+
 						// stub main for now
 						this.main = () => {};
 					}
@@ -97,15 +107,6 @@
 					// }
 
 					launch() {
-						// make java.lang classes global
-						for (let name in this.java.lang) {
-							if (name == 'String') continue;
-							window[name] = this.java.lang[name];
-						}
-
-						System.in.reset();
-						System.out.reset();
-
 						this.main(this.jvmArgs);
 					}
 
@@ -139,7 +140,7 @@
 							imp.load = null;
 							imp.classPath = className.split('.');
 
-							let src = './jdk';
+							let src = this.root + '/jdk';
 							for (let part of imp.classPath) {
 								src += '/' + part;
 							}
@@ -167,7 +168,12 @@
 						return classes;
 					}
 
-					async run(file) {
+					async translate(file) {
+						if (!this.java) {
+							console.error(
+								'java2js error: JDK not initialized! You must call `await jdk.init()` before using `jdk.run()`'
+							);
+						}
 						let classLine = file.indexOf('public class');
 						let imports = file.slice(0, classLine);
 						imports = imports.match(/(?<=^import )[^;]*/gm) || [];
@@ -187,7 +193,7 @@
 						// workaround hack for converting lambda expressions to Runnables
 						let lambdaRegex = /\(\)\s*\->\s*\{(([^\{\}]*\{[^\}]*\})*[^\}]*)\}/g;
 						file = file.replaceAll(lambdaRegex, (match, in0) => {
-							log(in0);
+							// log(in0);
 							if (lambdaRegex.test(in0)) {
 								in0 = in0.replaceAll(lambdaRegex, (match, in1) => {
 									return 'new Runnable() {\n@Override\npublic void run() {' + in1 + '}}';
@@ -203,9 +209,7 @@
 						file = file.replace(/\(int\)\s*/gm, 'Math.floor');
 						file = file.replace(/\(int\)\s*\-/gm, 'Math.ceil');
 
-						log(file);
-
-						let trans = java_to_javascript(file);
+						let trans = await java_to_javascript(file);
 
 						// log(trans);
 
@@ -233,14 +237,35 @@
 
 						trans = prefix + trans + suffix;
 
-						log(trans);
+						return trans;
+					}
 
-						try {
-							eval(trans);
-						} catch (e) {
-							console.error(e);
-							if (window?.ide) ide.log.value += e;
-						}
+					run(trans) {
+						return new Promise(async (resolve, reject) => {
+							const script = document.createElement('script');
+							script.async = false;
+							script.onload = function () {
+								// log('loaded: ' + src);
+								resolve();
+							};
+							script.onerror = (e) => {
+								reject(e);
+							};
+							// prevent page loading from the browser's cache
+							// if (QuintOS.context == 'live') {
+							// 	src += '?' + Date.now();
+							// }
+
+							script.innerHTML = trans;
+
+							document.body.appendChild(script);
+						});
+						// try {
+						// 	eval(trans);
+						// } catch (e) {
+						// 	console.error(e);
+						// 	if (this.ide) this.log.value += e;
+						// }
 					}
 				}
 				window.jdk = new JDK();
@@ -19419,53 +19444,59 @@
 					 * @return {string} - Converted JavaScript
 					 */
 					const javaToJavascript = (javaString, options = {}, progress) => {
-						if (typeof javaString !== 'string') throw 'java-to-javascript: First argument must be a string';
+						return new Promise((resolve, reject) => {
+							if (typeof javaString !== 'string') {
+								reject('java-to-javascript: First argument must be a string');
+							}
 
-						// Reset opts parameters
-						Object.assign(opts, DEFAULT_OPTIONS);
+							// Reset opts parameters
+							Object.assign(opts, DEFAULT_OPTIONS);
 
-						if (options.globalVars) opts.globalVars = options.globalVars;
-						if (options.globalScope) opts.globalScope = options.globalScope;
-						if (options.ugly) opts.separator = '';
-						if (options.p5) {
-							Object.assign(opts.globalVars, p5_options.globalVars, opts.globalVars);
-							if (!opts.globalScope) opts.globalScope = 'p5';
-						}
+							if (options.globalVars) opts.globalVars = options.globalVars;
+							if (options.globalScope) opts.globalScope = options.globalScope;
+							if (options.ugly) opts.separator = '';
+							if (options.p5) {
+								Object.assign(opts.globalVars, p5_options.globalVars, opts.globalVars);
+								if (!opts.globalScope) opts.globalScope = 'p5';
+							}
 
-						if (progress) progress(0, 'Parsing Java');
+							if (progress) progress(0, 'Parsing Java');
 
-						if (options.p5) javaString = `class JavaJsTemp__ {${fixP5(javaString)}}`;
+							if (options.p5) javaString = `class JavaJsTemp__ {${fixP5(javaString)}}`;
 
-						let javaAST$$1;
-						try {
-							javaAST$$1 = javaAST.parse(javaString);
-						} catch (e) {
-							let line = e.location.start.line;
-							if (e.location) throw `on line ${line}: \n\n${javaString.split('\n')[line - 1].trim()}\n\n${e.stack}`;
-							else throw e;
-						}
+							let javaAST$$1;
+							try {
+								javaAST$$1 = javaAST.parse(javaString);
+							} catch (e) {
+								let line = e.location.start.line;
+								if (e.location) reject(`on line ${line}: \n\n${javaString.split('\n')[line - 1].trim()}\n\n${e.stack}`);
+								else reject(e);
+							}
 
-						if (progress) progress(0.5, 'Converting to JavaScript');
+							if (progress) progress(0.5, 'Converting to JavaScript');
 
-						let jsString;
-						if (options.p5) {
-							jsString = globalsToJs(parseClass(javaAST$$1.types[0], true));
-						} else {
-							jsString = javaAST$$1.types.map((globalClass) => classToJs(parseClass(globalClass))).join(opts.separator);
-						}
+							let jsString;
+							if (options.p5) {
+								jsString = globalsToJs(parseClass(javaAST$$1.types[0], true));
+							} else {
+								jsString = javaAST$$1.types
+									.map((globalClass) => classToJs(parseClass(globalClass)))
+									.join(opts.separator);
+							}
 
-						if (progress) progress(0.75, 'Beautifying');
+							if (progress) progress(0.75, 'Beautifying');
 
-						if (!options.ugly) {
-							jsString =
-								beautify$2(jsString, {
-									indent_size: 2
-								}) + '\n';
-						}
+							if (!options.ugly) {
+								jsString =
+									beautify$2(jsString, {
+										indent_size: 2
+									}) + '\n';
+							}
 
-						if (progress) progress(1.0, 'Success');
+							if (progress) progress(1.0, 'Success');
 
-						return jsString;
+							resolve(jsString);
+						});
 					};
 
 					var lib = javaToJavascript;

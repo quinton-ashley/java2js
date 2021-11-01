@@ -1,13 +1,10 @@
 (async () => {
-	window.ide = {};
-	ide.log = document.getElementById('javaConsole');
-	ide.file0 = document.getElementById('javaFile');
-
+	jdk.log = document.getElementById('javaConsole');
 	await jdk.init();
 
-	ide.file0.onchange = () => {
-		ide.log.value = '';
-		let file = ide.file0.value;
-		jdk.run(file);
+	let file0 = document.getElementById('javaFile');
+	file0.onchange = () => {
+		jdk.log.value = '';
+		jdk.run(file0.value);
 	};
 })();
