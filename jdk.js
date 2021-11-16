@@ -182,28 +182,46 @@
 						let className = file.slice(classLine + 13, file.indexOf(' {', classLine + 13));
 
 						// workaround hack for converting triple quotes to a normal string
-						file = file.replaceAll(/"""([^"]*)"""/g, (match, str) => {
-							str = str.replaceAll(/(.*)(\n|$)/g, '"$1\\n"+').slice(0, -1);
-							return str;
+						file = file.replace(/"""([^"]*)"""/gm, (match, p1) => {
+							return '(' + p1.replace(/(  |\t){0,3}(.*)(\n|$)/gm, '"$2\\n"+').slice(0, -1) + ')';
 						});
 
 						// hacky support for Array literals
-						file = file.replaceAll(/=\s*new \w*\[\]\s*\{/g, '= {');
+						file = file.replace(/new\s*\w*\s*\[\s*\]\s*\{(.*)\}/gm, 'new Array($1)');
+
+						file = file.replace(/new\s*\w*(\s*\[\s*\])*\s*\{(.*)\}/gm, (match, p1, p2) => {
+							return 'new Array(' + p2.replace(/\{([^\}]*)\}/gm, 'new Array($1)') + ')';
+						});
 
 						// workaround hack for converting lambda expressions to Runnables
 						let lambdaRegex = /\(\)\s*\->\s*\{(([^\{\}]*\{[^\}]*\})*[^\}]*)\}/g;
-						file = file.replaceAll(lambdaRegex, (match, in0) => {
+
+						// can't even do this... bruh
+						// file = file.replace(lambdaRegex, (match, in0) => {
+						// 	// log(in0);
+						// 	if (lambdaRegex.test(in0)) {
+						// 		in0 = in0.replace(lambdaRegex, (match, in1) => {
+						// 			return 'new Runnable() {\\n@Override\\npublic void run() {' + in1 + '}\\n}';
+						// 		});
+						// 	}
+						// 	return 'new Runnable() {\\n@Override\\npublic void run() {' + in0 + '}\\n}';
+						// });
+
+						// TODO fix this by adding real support for lambda
+						file = file.replace(lambdaRegex, (match, in0) => {
 							// log(in0);
 							if (lambdaRegex.test(in0)) {
-								in0 = in0.replaceAll(lambdaRegex, (match, in1) => {
-									return 'new Runnable() {\n@Override\npublic void run() {' + in1 + '}}';
+								in0 = in0.replace(lambdaRegex, (match, in1) => {
+									in1.replaceAll('\n', '\\n');
+									return 'new Runnable("' + in1 + '")';
 								});
 							}
-							return 'new Runnable() {\n@Override\npublic void run() {' + in0 + '}}';
+							in0 = in0.replaceAll('\n', '\\n');
+							return 'new Runnable("' + in0 + '")';
 						});
 
 						// convert string .length() method
-						file = file.replaceAll(/\.length\(\)/g, '.length');
+						file = file.replace(/\.length\(\)/gm, '.length');
 
 						// cast to int, truncates the number (just removes decimal value)
 						file = file.replace(/\(int\)\s*/gm, 'Math.floor');
@@ -213,7 +231,12 @@
 
 						// log(trans);
 
-						trans = trans.replace(/(\([^\)]*\) =>)/gm, 'async $1');
+						// TODO fix this by adding real support for lambda
+						trans = trans.replace(/new\s*Runnable\('(.*)'\)/, (match, p1) => {
+							return '() => {' + p1.replaceAll('\\n', '\n') + '}';
+						});
+
+						trans = trans.replace(/(\([^\(\)]*\) =>)/gm, 'async $1');
 						trans = trans.replace(/([\w_\$]+\.next(Int|Float|Double|Line|Short|Long)*\(\))/gm, 'await $1');
 
 						let prefix = `((jdk.imports['games_java.${className}'] = {}).load = async () => {\n\n`;
@@ -233,7 +256,7 @@
 						}
 						prefix += '\n';
 
-						let suffix = `\njdk.main = ${className}.main;\njdk.launch();\n})();`;
+						let suffix = `\nwindow.${className} = ${className};\njdk.main = ${className}.main;\njdk.launch();\n})();`;
 
 						trans = prefix + trans + suffix;
 
@@ -19184,8 +19207,12 @@
 								case 'ArrayInitializer':
 									return `[${expr.expressions.map(parseExpr)}]`;
 								case 'ArrayCreation':
-									return `new Array()`; // TODOQ multiple dimensions?
+									return `new Array()`;
 								case 'ArrayAccess':
+									// TODO support for three dimensional arrays
+									if (expr.array.array) {
+										return `${expr.array.array.identifier}[${parseExpr(expr.array.index)}][${parseExpr(expr.index)}]`;
+									}
 									return `${expr.array.identifier}[${parseExpr(expr.index)}]`;
 								case 'ParenthesizedExpression':
 									return `(${parseExpr(expr.expression)})`;
@@ -19352,7 +19379,14 @@
 						for (const var_ of vars) {
 							if (var_.value === undefined) var_.value = literalInitializers[var_.type] || 'null';
 							if (var_.static) staticVars.push(`${className}.${var_.name}=${var_.value};`);
-							else initVars.push(`this.${var_.name}=${var_.value};`);
+							else {
+								if (typeof var_.value == 'string') {
+									for (const vv of vars) {
+										var_.value = var_.value.replaceAll(vv.name, 'this.' + vv.name);
+									}
+								}
+								initVars.push(`this.${var_.name}=${var_.value};`);
+							}
 						}
 
 						let addedConstructor = false;
@@ -19365,7 +19399,10 @@
 									isConstructor && addInitVars && initVars.length
 										? initVars.join('') + (block ? opts.separator : '')
 										: '';
-								classProps.push(`${name}(${parameters}){${preblock}${block}}`);
+								let method = `${name}(${parameters}){${preblock}${block}}`;
+								if (typeof QuintOS != 'undefined' && /(System|alert|prompt|eraseRect)/gm.test(block))
+									method = 'async ' + method;
+								classProps.push(method);
 							}
 						};
 

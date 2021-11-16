@@ -1,8 +1,8 @@
 {
 	"name": "java2js",
-	"version": "1.0.7",
+	"version": "1.0.8",
 	"description": "Converts Java to JavaScript with support for p5.js and QuintOS.",
-	"main": "java2js.js",
+	"main": "jdk.js",
 	"scripts": {
 		"start": "open demo.html",
 		"test": "echo \"Error: no test specified\" && exit 1",

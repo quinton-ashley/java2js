@@ -32,7 +32,7 @@ jdk.imports['java.io.PrintStream'].load = async () => {
 		}
 
 		printf(format, ...args) {
-			let str = new Formatter().format(format, args);
+			let str = String.format(format, args);
 			this.log += str;
 			if (window?.ide) {
 				ide.log.value += str;
