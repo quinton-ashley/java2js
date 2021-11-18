@@ -48,7 +48,7 @@
 					constructor() {}
 
 					async init(root) {
-						this.root = root || '.';
+						this.root = root || 'https://unpkg.com/java2js';
 						this.java = {};
 						let pkgs = ['com', 'lang', 'org', 'io', 'util'];
 						for (let pkg of pkgs) {

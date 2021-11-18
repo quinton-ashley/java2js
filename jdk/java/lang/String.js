@@ -19,6 +19,9 @@ jdk.imports['java.lang.String'].load = async () => {
 	String.prototype.contains = function (substr) {
 		return this.includes(substr);
 	};
+	String.prototype.equals = function (o) {
+		return this == o;
+	};
 	// static methods
 	String.valueOf = (c) => {
 		return c.toString();
