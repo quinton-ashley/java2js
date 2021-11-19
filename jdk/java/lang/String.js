@@ -22,6 +22,9 @@ jdk.imports['java.lang.String'].load = async () => {
 	String.prototype.equals = function (o) {
 		return this == o;
 	};
+	String.prototype.toCharArray = function (o) {
+		return this.split('');
+	};
 	// static methods
 	String.valueOf = (c) => {
 		return c.toString();
