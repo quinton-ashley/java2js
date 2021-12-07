@@ -50,7 +50,7 @@
 					async init(root) {
 						this.root = root || 'https://unpkg.com/java2js';
 						this.java = {};
-						let pkgs = ['com', 'lang', 'org', 'io', 'util'];
+						let pkgs = ['com', 'lang', 'org', 'io', 'util', 'time'];
 						for (let pkg of pkgs) {
 							this.java[pkg] = {};
 						}
@@ -274,21 +274,11 @@
 							script.onerror = (e) => {
 								reject(e);
 							};
-							// prevent page loading from the browser's cache
-							// if (QuintOS.context == 'live') {
-							// 	src += '?' + Date.now();
-							// }
 
 							script.innerHTML = trans;
 
 							document.body.appendChild(script);
 						});
-						// try {
-						// 	eval(trans);
-						// } catch (e) {
-						// 	console.error(e);
-						// 	if (this.ide) this.log.value += e;
-						// }
 					}
 				}
 				window.jdk = new JDK();
@@ -19211,9 +19201,11 @@
 								case 'ArrayAccess':
 									// TODO support for three dimensional arrays
 									if (expr.array.array) {
-										return `${expr.array.array.identifier}[${parseExpr(expr.array.index)}][${parseExpr(expr.index)}]`;
+										return `${assignParent(expr.array.array.identifier)}[${parseExpr(expr.array.index)}][${parseExpr(
+											expr.index
+										)}]`;
 									}
-									return `${expr.array.identifier}[${parseExpr(expr.index)}]`;
+									return `${assignParent(expr.array.identifier)}[${parseExpr(expr.index)}]`;
 								case 'ParenthesizedExpression':
 									return `(${parseExpr(expr.expression)})`;
 								default:
