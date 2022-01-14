@@ -50,7 +50,7 @@
 					async init(root) {
 						this.root = root || 'https://unpkg.com/java2js';
 						this.java = {};
-						let pkgs = ['com', 'lang', 'org', 'io', 'util', 'time'];
+						let pkgs = ['com', 'io', 'lang', 'org', 'security', 'time', 'util'];
 						for (let pkg of pkgs) {
 							this.java[pkg] = {};
 						}
@@ -106,8 +106,8 @@
 					// 	this.launch();
 					// }
 
-					launch() {
-						this.main(this.jvmArgs);
+					run(jvmArgs) {
+						this.main(jvmArgs);
 					}
 
 					getClass(classPath) {
@@ -171,7 +171,7 @@
 					async translate(file) {
 						if (!this.java) {
 							console.error(
-								'java2js error: JDK not initialized! You must call `await jdk.init()` before using `jdk.run()`'
+								'java2js error: JDK not initialized! You must call `await jdk.init()` before using `jdk.load()`'
 							);
 						}
 						let classLine = file.indexOf('public class');
@@ -192,6 +192,8 @@
 						file = file.replace(/new\s*\w*(\s*\[\s*\])*\s*\{(.*)\}/gm, (match, p1, p2) => {
 							return 'new Array(' + p2.replace(/\{([^\}]*)\}/gm, 'new Array($1)') + ')';
 						});
+
+						file = file.replace(/new\s*\w*\s*\[\s*(\d)+\s*\]\s*/gm, 'new Array($1)');
 
 						// workaround hack for converting lambda expressions to Runnables
 						let lambdaRegex = /\(\)\s*\->\s*\{(([^\{\}]*\{[^\}]*\})*[^\}]*)\}/g;
@@ -244,7 +246,7 @@
 						// handle Java class imports
 						for (let i = 0; i < imports.length; i++) {
 							let imp = imports[i];
-							// skip static imports for now (like QuintOS)
+							// skip static imports for now
 							if (imp.includes('static')) continue;
 							let impPath = imp.split('.');
 							let impName = impPath[impPath.length - 1];
@@ -256,14 +258,16 @@
 						}
 						prefix += '\n';
 
-						let suffix = `\nwindow.${className} = ${className};\njdk.main = ${className}.main;\njdk.launch();\n})();`;
+						let suffix = '\n';
+						suffix += `window.${className} = ${className};\n`;
+						suffix += '})();';
 
 						trans = prefix + trans + suffix;
 
 						return trans;
 					}
 
-					run(trans) {
+					load(trans) {
 						return new Promise(async (resolve, reject) => {
 							const script = document.createElement('script');
 							script.async = false;
@@ -19424,6 +19428,7 @@
 									staticVars.push(`${className}.${name}=(...args${SEP})=>{switch(args${SEP}.length){${cases}}};`);
 								else classProps.push(`${name}(...args${SEP}){switch(args${SEP}.length){${cases}}}`);
 							}
+							if (name == 'main') staticVars.push(`jdk.main = ${className}.main;`);
 						}
 
 						if (!addedConstructor && initVars.length) classProps.unshift(`constructor(){${initVars.join('')}}`);

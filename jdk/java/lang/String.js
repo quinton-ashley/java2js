@@ -3,15 +3,16 @@ jdk.imports['java.lang.String'].load = async () => {
 
 	// String is special, I just extended js String prototype
 	String.prototype.hashCode = function () {
-		let h = this._hashCode;
-		if (!h && this.length > 0) {
-			const val = this;
-			for (let i = 0; i < this.length; i++) {
-				h = 31 * h + this.charCodeAt(i);
-			}
-			this._hashCode = h;
+		var hash = 0,
+			i,
+			chr;
+		if (this.length === 0) return hash;
+		for (i = 0; i < this.length; i++) {
+			chr = this.charCodeAt(i);
+			hash = (hash << 5) - hash + chr;
+			hash |= 0; // Convert to 32bit integer
 		}
-		return h;
+		return hash;
 	};
 	String.prototype.isEmpty = function () {
 		return this.length == 0;
