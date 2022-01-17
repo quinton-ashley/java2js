@@ -187,10 +187,10 @@
 						});
 
 						// hacky support for Array literals
-						file = file.replace(/new\s*\w*\s*\[\s*\]\s*\{(.*)\}/gm, 'new Array($1)');
+						file = file.replace(/new\s*\w*\s*\[\s*\]\s*\{([^}]*)}/gm, 'Array.of($1)');
 
-						file = file.replace(/new\s*\w*(\s*\[\s*\])*\s*\{(.*)\}/gm, (match, p1, p2) => {
-							return 'new Array(' + p2.replace(/\{([^\}]*)\}/gm, 'new Array($1)') + ')';
+						file = file.replace(/new\s*\w*(\s*\[\s*\])*\s*\{([^}]*)\}/gm, (match, p1, p2) => {
+							return 'Array.of(' + p2.replace(/\{([^\}]*)\}/gm, 'Array.of($1)') + ')';
 						});
 
 						file = file.replace(/new\s*\w*\s*\[\s*(\d)+\s*\]\s*/gm, 'new Array($1)');
@@ -19129,7 +19129,14 @@
 						const classVarsMap = {};
 
 						const assignParent = (name) => {
-							if (name in classVarsMap) return `this.${name}`;
+							if (name in classVarsMap) {
+								let v = classData.vars.find((x) => x.name == name);
+								if (!v || !v.static) {
+									return `this.${name}`;
+								} else {
+									return `${classData.name}.${name}`;
+								}
+							}
 							const mapped = opts.globalVars[name];
 							if (mapped) {
 								const newName = typeof mapped === 'string' ? mapped : name;
@@ -19374,8 +19381,9 @@
 
 						for (const var_ of vars) {
 							if (var_.value === undefined) var_.value = literalInitializers[var_.type] || 'null';
-							if (var_.static) staticVars.push(`${className}.${var_.name}=${var_.value};`);
-							else {
+							if (var_.static) {
+								staticVars.push(`${className}.${var_.name}=${var_.value};`);
+							} else {
 								if (typeof var_.value == 'string') {
 									for (const vv of vars) {
 										var_.value = var_.value.replaceAll(vv.name, 'this.' + vv.name);

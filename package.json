@@ -1,6 +1,6 @@
 {
 	"name": "java2js",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "Converts Java to JavaScript with support for p5.js and QuintOS.",
 	"main": "jdk.js",
 	"scripts": {

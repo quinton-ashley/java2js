@@ -18,9 +18,15 @@ This function imports much of the standard Java lang classes into the global sco
 
 returns the Java file translated into JavaScript
 
-### jdk.run(translatedJSFile)
+### jdk.load(translatedJSFile)
 
 - translatedJSFile is the translated JS class to run
+
+Loads the JS class file but doesn't run the main method.
+
+### jdk.run(jvmArgs)
+
+Runs the main method with the given JVM arguments.
 
 ## Known limitations
 

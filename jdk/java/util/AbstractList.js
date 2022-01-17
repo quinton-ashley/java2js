@@ -2,80 +2,82 @@ jdk.imports['java.util.AbstractList'].load = async () => {
 	const Itr = await jdk.import('java.util.Itr');
 
 	class AbstractList {
-		constructor(content) {
+		constructor(arr) {
 			// TODO
-			this.content = content || [];
+			this.arr = arr || [];
 		}
 
 		addAll(index, vals) {
-			const tempArray = vals.toArray(null);
-			for (let i = 0; i < tempArray.length; i++) {
-				this.content.push(tempArray[i]);
-			}
-			return false;
+			this.arr.splice(index, 0, ...vals);
 		}
 
 		clear() {
-			this.content = [];
+			this.arr = [];
 		}
 
 		poll() {
-			return this.content.shift();
+			return this.arr.shift();
 		}
 
 		remove(indexOrElem) {
-			this.content.splice(indexOrElem, 1);
-			return true;
+			let index = indexOrElem;
+			if (typeof indexOrElem != 'number') {
+				index = this.arr.indexOf(indexOrElem);
+			}
+			return this.arr.splice(index, 1);
 		}
 
 		removeAll() {
-			this.content = [];
+			this.arr = [];
 			return true;
 		}
 
-		toArray(a) {
-			return this.content;
+		toArray() {
+			return this.arr;
+		}
+
+		toString() {
+			return '[' + this.arr.toString() + ']';
 		}
 
 		size() {
-			return this.content.length;
+			return this.arr.length;
 		}
 
 		add(index, elem) {
-			if (typeof elem !== 'undefined') {
-				this.content.splice(index, 0, elem);
+			if (typeof elem == 'undefined') {
+				return this.arr.push(index);
 			} else {
-				this.content.push(index);
+				return this.arr.splice(index, 0, elem);
 			}
 		}
 
 		get(index) {
-			return this.content[index];
+			return this.arr[index];
 		}
 
 		contains(val) {
-			return this.content.indexOf(val) != -1;
+			return this.arr.indexOf(val) != -1;
 		}
 
-		containsAll(elems) {
-			return false;
-		}
+		// containsAll(elems) {
+		// }
 
 		isEmpty() {
-			return this.content.length == 0;
+			return this.arr.length == 0;
 		}
 
 		set(index, element) {
-			this.content[index] = element;
+			this.arr[index] = element;
 			return element;
 		}
 
 		indexOf(element) {
-			return this.content.indexOf(element);
+			return this.arr.indexOf(element);
 		}
 
 		lastIndexOf(element) {
-			return this.content.lastIndexOf(element);
+			return this.arr.lastIndexOf(element);
 		}
 
 		iterator() {

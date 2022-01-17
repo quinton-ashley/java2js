@@ -16,6 +16,9 @@ jdk.imports['java.io.PrintStream'].load = async () => {
 		}
 
 		_printArray(arr) {
+			console.error(
+				'ERROR: In Java, printing a primitive array prints the memory location of that array in the Java Virtual Machine. To print the contents of the array use a loop!'
+			);
 			let md = MessageDigest.getInstance();
 			let str = '[Ljava.lang.';
 			let hash = md.digest(arr.toString()).slice(0, 8);
