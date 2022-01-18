@@ -215,11 +215,11 @@
 							if (lambdaRegex.test(in0)) {
 								in0 = in0.replace(lambdaRegex, (match, in1) => {
 									in1.replaceAll('\n', '\\n');
-									return 'new Runnable("' + in1 + '")';
+									return 'new Runnable("' + in1 + '")';
 								});
 							}
 							in0 = in0.replaceAll('\n', '\\n');
-							return 'new Runnable("' + in0 + '")';
+							return 'new Runnable("' + in0 + '")';
 						});
 
 						// convert string .length() method
@@ -234,7 +234,7 @@
 						// log(trans);
 
 						// TODO fix this by adding real support for lambda
-						trans = trans.replace(/new\s*Runnable\('(.*)'\)/, (match, p1) => {
+						trans = trans.replace(/new\s*Runnable\('([^]*)'\)/gm, (match, p1) => {
 							return '() => {' + p1.replaceAll('\\n', '\n') + '}';
 						});
 
