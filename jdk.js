@@ -80,7 +80,10 @@
 								lang.push('java.lang.' + name);
 							}
 							await this.import(lang);
-						} catch (e) {}
+						} catch (ror) {
+							console.error(ror);
+							return;
+						}
 
 						// make java.lang classes global
 						for (let name in this.java.lang) {
@@ -130,40 +133,32 @@
 						for (let className of classNames) {
 							// log('importing ' + className);
 							let imp = this.imports[className];
-							if (imp) {
-								// class is ready for use
-								if (imp.ready) ready++;
-								// class file loaded but not ready yet
-								continue;
+							if (!imp) {
+								imp = this.imports[className] = {};
+								imp.load = null;
+								imp.classPath = className.split('.');
+
+								let src = this.root + '/jdk';
+								for (let part of imp.classPath) {
+									src += '/' + part;
+								}
+								src += '.js';
+
+								const loadJS = () => {
+									return new Promise((resolve, reject) => {
+										const script = document.createElement('script');
+										document.body.appendChild(script);
+										script.onload = resolve;
+										script.onerror = reject;
+										script.async = true;
+										script.src = src;
+									});
+								};
+								await loadJS();
 							}
-							imp = this.imports[className] = {};
-							imp.load = null;
-							imp.classPath = className.split('.');
-
-							let src = this.root + '/jdk';
-							for (let part of imp.classPath) {
-								src += '/' + part;
-							}
-							src += '.js';
-
-							const loadJS = () => {
-								return new Promise((resolve, reject) => {
-									const script = document.createElement('script');
-									document.body.appendChild(script);
-									script.onload = resolve;
-									script.onerror = reject;
-									script.async = true;
-									script.src = src;
-								});
-							};
-
-							await loadJS();
-
-							await imp.load();
-
+							if (!imp.ready) await imp.load();
 							classes.push(this.getClass(imp.classPath));
 						}
-
 						if (classNames.length == 1) classes = classes[0];
 						return classes;
 					}
@@ -186,13 +181,17 @@
 							return '(' + p1.replace(/(  |\t){0,3}(.*)(\r*\n|$)/gm, '"$2\\n"+').slice(0, -1) + ')';
 						});
 
+						let arrToString = '';
+
 						// hacky support for Array literals
 						file = file.replace(/new\s*\w*\s*\[\s*\]\s*\{([^}]*)}/gm, 'Array.of($1)');
 
+						// 2D arrays
 						file = file.replace(/new\s*\w*(\s*\[\s*\])*\s*\{([^}]*)\}/gm, (match, p1, p2) => {
 							return 'Array.of(' + p2.replace(/\{([^\}]*)\}/gm, 'Array.of($1)') + ')';
 						});
 
+						// Array with defined length
 						file = file.replace(/new\s*\w*\s*\[\s*(\d)+\s*\]\s*/gm, 'new Array($1)');
 
 						// workaround hack for converting lambda expressions to Runnables
@@ -19210,13 +19209,21 @@
 								case 'ArrayCreation':
 									return `new Array()`;
 								case 'ArrayAccess':
+									let arr = expr.array;
 									// TODO support for three dimensional arrays
-									if (expr.array.array) {
-										return `${assignParent(expr.array.array.identifier)}[${parseExpr(expr.array.index)}][${parseExpr(
-											expr.index
-										)}]`;
+									if (arr.array) {
+										return `${assignParent(arr.array.identifier)}[${parseExpr(arr.index)}][${parseExpr(expr.index)}]`;
 									}
-									return `${assignParent(expr.array.identifier)}[${parseExpr(expr.index)}]`;
+									if (arr.identifier) {
+										return `${assignParent(arr.identifier)}[${parseExpr(expr.index)}]`;
+									}
+									// TODO support for third level subclasses
+									if (arr.qualifier.qualifier) {
+										return `${assignParent(arr.qualifier.qualifier.identifier)}.${arr.qualifier.name.identifier}.${
+											arr.name.identifier
+										}[${parseExpr(expr.index)}]`;
+									}
+									return `${assignParent(arr.qualifier.identifier)}.${arr.name.identifier}[${parseExpr(expr.index)}]`;
 								case 'ParenthesizedExpression':
 									return `(${parseExpr(expr.expression)})`;
 								default:
@@ -19372,12 +19379,16 @@
 						return classData;
 					};
 
-					const classToJs = ({ name: className, vars, superclass, methods, abstract }) => {
+					const classToJs = ({ name: className, vars, superclass, methods, abstract, classes }) => {
 						if (abstract) return '';
 
 						const initVars = [];
 						const classProps = [];
 						const staticVars = [];
+
+						for (const cl of classes) {
+							staticVars.push(`${classToJs(cl)}\n${className}.${cl.name}=${cl.name};`);
+						}
 
 						for (const var_ of vars) {
 							if (var_.value === undefined) var_.value = literalInitializers[var_.type] || 'null';
@@ -19404,7 +19415,7 @@
 										? initVars.join('') + (block ? opts.separator : '')
 										: '';
 								let method = `${name}(${parameters}){${preblock}${block}}`;
-								if (typeof QuintOS != 'undefined' && /(System|alert|prompt|eraseRect)/gm.test(block))
+								if (typeof QuintOS != 'undefined' && /(alert|prompt|erase|eraseRect|text|textRect|frame)/gm.test(block))
 									method = 'async ' + method;
 								classProps.push(method);
 							}

@@ -3,7 +3,7 @@ jdk.imports['java.util.ArrayList'].load = async () => {
 
 	class ArrayList extends AbstractList {
 		constructor(...args) {
-			super(args);
+			super(...args);
 		}
 	}
 	jdk.java.util.ArrayList = ArrayList;

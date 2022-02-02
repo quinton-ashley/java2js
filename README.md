@@ -1,14 +1,45 @@
-# Java to Javascript for QuintOS
+# Java to Javascript
 
-I've built on top of the [java-to-javascript](https://github.com/wyattades/java-to-javascript) transpiler by @wyattades and got inspiration from the JDK (Java Development Kit) implementation in [java2javascript](https://github.com/java2script/java2script) by @BobHanson, @zhourenjian, @abego, and others.
+I've built on top of the [java-to-javascript](https://github.com/wyattades/java-to-javascript) transpiler by @wyattades and got inspiration from the barebones JDK (Java Development Kit) implementation in [java2javascript](https://github.com/java2script/java2script) by @BobHanson, @zhourenjian, @abego, and others.
 
-My purpose in creating this project is to allow intro level CS students to write Java code but still use my [QuintOS](https://github.com/quinton-ashley/quintos) retro game engine library which is web based. Yes, I went to all this trouble just so some teenagers don't have to run their programs in a boring Java console! I made a barebones JDK implementation in modern Javascript to acheive this.
+I created this project so intro level computer science students could write Java code but still use my [QuintOS](https://github.com/quinton-ashley/quintos) retro game engine library, which is web based. Yes, I went to all this trouble just so my students don't have to run their programs in a boring Java console! To achieve this I've been working on a JDK implementation in modern Javascript.
+
+## Java Classes Included in the JS JDK
+
+| java.io |             |             |
+| ------- | ----------- | ----------- |
+| File    | InputStream | PrintStream |
+
+| java.lang |               |           |
+| --------- | ------------- | --------- |
+| Boolean   | Byte          | Character |
+| Double    | Exception     | Float     |
+| Integer   | Long          | Short     |
+| String    | StringBuilder | System    |
+| Thread    | Throwable     |           |
+
+| java.security |     |     |
+| ------------- | --- | --- |
+| MessageDigest |     |     |
+
+| java.time |     |     |
+| --------- | --- | --- |
+| Instant   |     |     |
+
+| java.util          |                        |             |
+| ------------------ | ---------------------- | ----------- |
+| AbstractCollection | AbstractList           | AbstractMap |
+| AbstractSet        | ArrayList              | Arrays      |
+| Collections        | Formatter              | HashMap     |
+| HashSet            | IllegalFormatException | Itr         |
+| LinkedList         | Random                 | Scanner     |
+| Set                | Stack                  |             |
 
 ## API
 
 ### jdk.init(root)
 
-- root is the local path or url to the parent folder of the jdk, by default it links to 'https://unpkg.com/java2js' (this package) so you don't need to change it
+- root (optional) can be a local path or url to the parent folder of the JS `jdk` folder, by default it links to 'https://unpkg.com/java2js' (this package) so you don't need to change it
 
 This function imports much of the standard Java lang classes into the global scope. You must use it before translating or running files.
 
@@ -26,16 +57,22 @@ Loads the JS class file but doesn't run the main method.
 
 ### jdk.run(jvmArgs)
 
-Runs the main method with the given JVM arguments.
+Runs the main method with optional JVM arguments.
 
 ## Known limitations
 
-- casting to int truncation workaround requires parenthesis around the number being cast
+- casting to int truncation workaround requires parenthesis around the number being cast `int x = (int) (Math.random() * 100);`
 
 - no support for method overloading, though a workaround might be possible by making a function with the og name route to each of the variations of the overloaded function
 
 - no support for private/public methods yet, though this could be done since they are included in modern JavaScript classes
 
+- no three dimensional arrays
+
+- no third level static classes
+
+- not much error checking
+
 ## Contribute
 
-I've only done a barebones implementation of Java 17 JDK, a lot is missing, so if you are interested in adding more please go for it and submit a pull request!
+I've only done a partial implementation of the Java 17 JDK in JavaScript, so if you're interested in adding more please go for it and submit a pull request!

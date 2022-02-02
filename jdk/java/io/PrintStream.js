@@ -21,7 +21,7 @@ jdk.imports['java.io.PrintStream'].load = async () => {
 			);
 			let md = MessageDigest.getInstance();
 			let str = '[Ljava.lang.';
-			let hash = md.digest(arr.toString()).slice(0, 8);
+			let hash = md.digest(arr.join(',')).slice(0, 8);
 			if (arr.length == 0) {
 				return str + 'Array;@' + hash;
 			}
@@ -36,6 +36,8 @@ jdk.imports['java.io.PrintStream'].load = async () => {
 			let str;
 			if (Array.isArray(arg)) {
 				str = this._printArray(arg);
+			} else if (typeof arg == 'undefined' || arg == null) {
+				str = 'null';
 			} else {
 				str = arg.toString();
 			}
@@ -57,7 +59,7 @@ jdk.imports['java.io.PrintStream'].load = async () => {
 		}
 
 		printf(format, ...args) {
-			let str = String.format(format, args);
+			let str = String.format(format, ...args);
 			return this._print(str);
 		}
 	}
