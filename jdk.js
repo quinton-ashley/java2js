@@ -19415,7 +19415,10 @@
 										? initVars.join('') + (block ? opts.separator : '')
 										: '';
 								let method = `${name}(${parameters}){${preblock}${block}}`;
-								if (typeof QuintOS != 'undefined' && /(alert|prompt|erase|eraseRect|text|textRect|frame)/gm.test(block))
+								if (
+									typeof QuintOS != 'undefined' &&
+									/(alert|prompt|delay|erase|eraseRect|text|textRect|frame)/gm.test(block)
+								)
 									method = 'async ' + method;
 								classProps.push(method);
 							}
