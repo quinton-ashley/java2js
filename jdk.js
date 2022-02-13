@@ -238,7 +238,6 @@
 						});
 
 						trans = trans.replace(/(\([^\(\)]*\) =>)/gm, 'async $1');
-						trans = trans.replace(/([\w_\$]+\.next(Int|Float|Double|Line|Short|Long)*\(\))/gm, 'await $1');
 
 						let prefix = `((jdk.imports['games_java.${className}'] = {}).load = async () => {\n\n`;
 
@@ -19417,7 +19416,7 @@
 								let method = `${name}(${parameters}){${preblock}${block}}`;
 								if (
 									typeof QuintOS != 'undefined' &&
-									/(alert|prompt|delay|erase|eraseRect|text|textRect|frame)/gm.test(block)
+									/(alert|prompt|delay|erase|eraseRect|text|textRect|frame|print)/gm.test(block)
 								)
 									method = 'async ' + method;
 								classProps.push(method);
