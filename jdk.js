@@ -169,7 +169,10 @@
 								'java2js error: JDK not initialized! You must call `await jdk.init()` before using `jdk.load()`'
 							);
 						}
-						let classLine = file.indexOf('public class');
+						// bodge fix to avoid getting the index of a commented out class
+						// (only works with normal comments)
+						let classLine = file.indexOf('\npublic class');
+						if (classLine < 0) classLine = file.indexOf('public class');
 						let imports = file.slice(0, classLine);
 						imports = imports.match(/(?<=^import )[^;]*/gm) || [];
 
@@ -19126,13 +19129,34 @@
 						};
 						const classVarsMap = {};
 
-						const assignParent = (name) => {
+						let asyncMethods = [];
+						if (typeof QuintOS != 'undefined') {
+							asyncMethods = [
+								'alert',
+								'delay',
+								'erase',
+								'eraseRect',
+								'frame',
+								'move',
+								'play',
+								'print',
+								'println',
+								'printf',
+								'prompt',
+								'text',
+								'textRect'
+							];
+						}
+
+						const assignParent = (name, isInConstructor) => {
 							if (name in classVarsMap) {
 								let v = classData.vars.find((x) => x.name == name);
-								if (!v || !v.static) {
+								if (!isInConstructor && (!v || !v.static)) {
 									return `this.${name}`;
-								} else {
+								} else if (v.static) {
 									return `${classData.name}.${name}`;
+								} else {
+									return name;
 								}
 							}
 							const mapped = opts.globalVars[name];
@@ -19176,7 +19200,7 @@
 										expr.elseExpression
 									)}`;
 								case 'SimpleName':
-									return assignParent(expr.identifier);
+									return assignParent(expr.identifier, expr.isInConstructor);
 								case 'QualifiedName':
 									return `${parseExpr(expr.qualifier)}.${expr.name.identifier}`;
 								case 'FieldAccess':
@@ -19188,9 +19212,16 @@
 									if (op === '!=' || op === '==') op += '='; // triple equals in JS
 									return `${parseExpr(expr.leftOperand)} ${op} ${parseExpr(expr.rightOperand)}`;
 								case 'MethodInvocation':
-									const args = `(${expr.arguments.map(parseExpr)})`;
-									if (expr.expression) return `${parseExpr(expr.expression)}.${expr.name.identifier}${args}`;
-									return `${assignParent(expr.name.identifier)}${args}`;
+									let str = '';
+									if (asyncMethods.includes(expr.name.identifier)) {
+										str += 'await ';
+									}
+									if (expr.expression) {
+										str += `${parseExpr(expr.expression)}.${expr.name.identifier}`;
+									} else {
+										str += `${assignParent(expr.name.identifier)}`;
+									}
+									return str + `(${expr.arguments.map(parseExpr)})`;
 								case 'InstanceofExpression':
 									return `${parseExpr(expr.leftOperand)} instanceof ${parseType(expr.rightOperand)}`;
 								case 'SuperMethodInvocation':
@@ -19316,7 +19347,7 @@
 							}
 						};
 
-						const parseBlock = (block) => {
+						const parseBlock = (block, method) => {
 							const semicolon = (str) => `${str}${str.endsWith('}') ? '' : ';'}`;
 
 							if (block.node !== 'Block') return semicolon(parseStatement(block));
@@ -19327,6 +19358,10 @@
 								const str = parseStatement(stat);
 								const arr = Array.isArray(str) ? str : [str];
 								statements.push(...arr.map(semicolon));
+								if (method && !method.isAsync && statements.join('').includes('await')) {
+									asyncMethods.push(method.name.identifier);
+									method.isAsync = true;
+								}
 							}
 
 							return statements.join('');
@@ -19345,6 +19380,11 @@
 								data.isConstructor = true;
 								data.name = 'constructor';
 								data.static = false;
+								for (let stat of method.body.statements) {
+									if (stat.expression.rightHandSide) {
+										stat.expression.rightHandSide.isInConstructor = true;
+									}
+								}
 							}
 
 							for (const param of method.parameters) {
@@ -19352,7 +19392,9 @@
 								else unhandledNode(block);
 							}
 
-							data.block = parseBlock(method.body);
+							data.block = parseBlock(method.body, method);
+
+							if (data.block.includes('await')) data.isAsync = true;
 
 							return data;
 						};
@@ -19405,7 +19447,7 @@
 
 						let addedConstructor = false;
 
-						const addMethod = ({ name, parameters, block, isConstructor, static: static_ }, addInitVars) => {
+						const addMethod = ({ name, parameters, block, isConstructor, isAsync, static: static_ }, addInitVars) => {
 							if (isConstructor) addedConstructor = true;
 							if (static_) staticVars.push(`${className}.${name}=(${parameters})=>{${block}};`);
 							else {
@@ -19414,11 +19456,7 @@
 										? initVars.join('') + (block ? opts.separator : '')
 										: '';
 								let method = `${name}(${parameters}){${preblock}${block}}`;
-								if (
-									typeof QuintOS != 'undefined' &&
-									/(alert|prompt|delay|erase|eraseRect|text|textRect|frame|print)/gm.test(block)
-								)
-									method = 'async ' + method;
+								if (isAsync) method = 'async ' + method;
 								classProps.push(method);
 							}
 						};
