@@ -19134,7 +19134,6 @@
 							asyncMethods = [
 								'alert',
 								'delay',
-								'erase',
 								'eraseRect',
 								'frame',
 								'move',
