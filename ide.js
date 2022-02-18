@@ -3,8 +3,11 @@
 	await jdk.init();
 
 	let file0 = document.getElementById('javaFile');
-	file0.onchange = () => {
+	file0.onchange = async () => {
 		jdk.log.value = '';
-		jdk.run(file0.value);
+		let translation = await jdk.translate(file0.value);
+		console.log(translation);
+		jdk.load(translation);
+		jdk.run();
 	};
 })();

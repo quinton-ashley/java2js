@@ -1,8 +1,10 @@
-# Java to Javascript
+# Java to JavaScript (java2js)
 
-I've built on top of the [java-to-javascript](https://github.com/wyattades/java-to-javascript) transpiler by @wyattades and got inspiration from the barebones JDK (Java Development Kit) implementation in [java2javascript](https://github.com/java2script/java2script) by @BobHanson, @zhourenjian, @abego, and others.
+`java2js` can translate simple Java programs to JavaScript and runs them using a JavaScript based JDK.
 
-I created this project so intro level computer science students could write Java code but still use my [QuintOS](https://github.com/quinton-ashley/quintos) retro game engine library, which is web based. Yes, I went to all this trouble just so my students don't have to run their programs in a boring Java console! To achieve this I've been working on a JDK implementation in modern Javascript.
+I made significant improvements to the [java-to-javascript](https://github.com/wyattades/java-to-javascript) transpiler by @wyattades. I also did a modern JS implementation of the fundamental classes in the JDK (Java Development Kit), inspired by [java2javascript](https://github.com/java2script/java2script) by @BobHanson, @zhourenjian, @abego, and others.
+
+I created this project so intro level computer science students could write Java code but still use my [QuintOS](https://github.com/quinton-ashley/quintos) retro game engine library, which is web based.
 
 ## Java Classes Included in the JS JDK
 
@@ -37,13 +39,13 @@ I created this project so intro level computer science students could write Java
 
 ## API
 
-### jdk.init(root)
+### await jdk.init(root)
 
-- root (optional) can be a local path or url to the parent folder of the JS `jdk` folder, by default it links to 'https://unpkg.com/java2js' (this package) so you don't need to change it
+- root (optional) path to the parent folder of the JS `jdk` folder, by default it is `./` you could also link to this package online 'https://unpkg.com/java2js'
 
 This function imports much of the standard Java lang classes into the global scope. You must use it before translating or running files.
 
-### jdk.translate(javaFile)
+### await jdk.translate(javaFile)
 
 - javaFile is a string with contents of a Java file
 
@@ -59,9 +61,22 @@ Loads the JS class file but doesn't run the main method.
 
 Runs the main method with optional JVM arguments.
 
+## Features
+
+- imports
+- static classes
+- static methods
+- array literals
+- arrays with initial size
+- two dimensional arrays
+- lambda arrow functions
+- triple quotes
+
 ## Known limitations
 
-- casting to int truncation workaround requires parenthesis around the number being cast `int x = (int) (Math.random() * 100);`
+- not very good error reporting
+
+- casting to int (truncation) requires parenthesis around the number being cast `int x = (int) (Math.random() * 100);`
 
 - no support for method overloading, though a workaround might be possible by making a function with the og name route to each of the variations of the overloaded function
 
@@ -71,7 +86,7 @@ Runs the main method with optional JVM arguments.
 
 - no third level static classes
 
-- not much error checking
+- no method can be named `.length()` because it will be replaced with `.length` for getting the length of Strings in JS
 
 ## Contribute
 

@@ -43,10 +43,10 @@ jdk.imports['java.io.PrintStream'].load = async () => {
 			}
 			if (ln) str += '\n';
 			this.log += str;
-			if (window?.ide) {
-				ide.log.value += str;
-				this._onPrint(str.length);
+			if (jdk.log) {
+				jdk.log.value += str;
 			}
+			this._onPrint(str.length);
 			return str;
 		}
 

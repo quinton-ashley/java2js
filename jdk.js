@@ -48,7 +48,7 @@
 					constructor() {}
 
 					async init(root) {
-						this.root = root || 'https://unpkg.com/java2js';
+						this.root = root || './';
 						this.java = {};
 						let pkgs = ['com', 'io', 'lang', 'org', 'security', 'time', 'util'];
 						for (let pkg of pkgs) {
@@ -98,17 +98,6 @@
 						this.main = () => {};
 					}
 
-					// async load() {
-					// 	// load all imported classes
-					// 	for (let className in this.imports) {
-					// 		let imp = this.imports[className];
-					// 		imp.classPath ??= className.split('.');
-					// 		await imp.load();
-					// 	}
-
-					// 	this.launch();
-					// }
-
 					run(jvmArgs) {
 						this.main(jvmArgs);
 					}
@@ -148,9 +137,9 @@
 									return new Promise((resolve, reject) => {
 										const script = document.createElement('script');
 										document.body.appendChild(script);
+										script.async = true;
 										script.onload = resolve;
 										script.onerror = reject;
-										script.async = true;
 										script.src = src;
 									});
 								};
@@ -172,11 +161,14 @@
 						// bodge fix to avoid getting the index of a commented out class
 						// (only works with normal comments)
 						let classLine = file.indexOf('\npublic class');
-						if (classLine < 0) classLine = file.indexOf('public class');
+						if (classLine < 0) {
+							classLine = file.indexOf('public class');
+						} else {
+							classLine += 1;
+						}
 						let imports = file.slice(0, classLine);
 						imports = imports.match(/(?<=^import )[^;]*/gm) || [];
 
-						let userName = window?.QuintOS?.userName || 'quinton-ashley';
 						let className = file.slice(classLine + 13, file.indexOf(' {', classLine + 13));
 
 						// workaround hack for converting triple quotes to a normal string
@@ -229,7 +221,6 @@
 
 						// cast to int, truncates the number (just removes decimal value)
 						file = file.replace(/\(int\)\s*/gm, 'Math.floor');
-						file = file.replace(/\(int\)\s*\-/gm, 'Math.ceil');
 
 						let trans = await java_to_javascript(file);
 
@@ -269,21 +260,9 @@
 					}
 
 					load(trans) {
-						return new Promise(async (resolve, reject) => {
-							const script = document.createElement('script');
-							script.async = false;
-							script.onload = function () {
-								// log('loaded: ' + src);
-								resolve();
-							};
-							script.onerror = (e) => {
-								reject(e);
-							};
-
-							script.innerHTML = trans;
-
-							document.body.appendChild(script);
-						});
+						const script = document.createElement('script');
+						script.innerHTML = trans;
+						document.body.appendChild(script);
 					}
 				}
 				window.jdk = new JDK();
@@ -19131,9 +19110,13 @@
 
 						let asyncMethods = [];
 						if (typeof QuintOS != 'undefined') {
+							// asyncMethods = {
+							// 	Sprite: ['move']
+							// };
 							asyncMethods = [
 								'alert',
 								'delay',
+								'erase',
 								'eraseRect',
 								'frame',
 								'move',
@@ -19212,7 +19195,7 @@
 									return `${parseExpr(expr.leftOperand)} ${op} ${parseExpr(expr.rightOperand)}`;
 								case 'MethodInvocation':
 									let str = '';
-									if (asyncMethods.includes(expr.name.identifier)) {
+									if (asyncMethods.includes(expr.name.identifier) && !expr.isInConstructor) {
 										str += 'await ';
 									}
 									if (expr.expression) {
@@ -19354,10 +19337,13 @@
 							const statements = [];
 
 							for (const stat of block.statements) {
+								if (method && stat.node == 'ExpressionStatement') {
+									stat.expression.isInConstructor = method.constructor;
+								}
 								const str = parseStatement(stat);
 								const arr = Array.isArray(str) ? str : [str];
 								statements.push(...arr.map(semicolon));
-								if (method && !method.isAsync && statements.join('').includes('await')) {
+								if (method && !method.isAsync && !method.constructor && statements.join('').includes('await')) {
 									asyncMethods.push(method.name.identifier);
 									method.isAsync = true;
 								}
