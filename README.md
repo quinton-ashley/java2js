@@ -2,11 +2,9 @@
 
 `java2js` can translate simple Java programs to JavaScript and runs them using a JavaScript based JDK.
 
-I made significant improvements to the [java-to-javascript](https://github.com/wyattades/java-to-javascript) transpiler by @wyattades. I also did a modern JS implementation of the fundamental classes in the JDK (Java Development Kit), inspired by [java2javascript](https://github.com/java2script/java2script) by @BobHanson, @zhourenjian, @abego, and others.
+Try out the `demo.html` and `ide.js`, a barebones implementation.
 
-I created this project so intro level computer science students could write Java code but still use my [QuintOS](https://github.com/quinton-ashley/quintos) retro game engine library, which is web based.
-
-## Java Classes Included in the JS JDK
+## Java classes included in the java2js JDK
 
 | java.io |             |             |
 | ------- | ----------- | ----------- |
@@ -37,31 +35,9 @@ I created this project so intro level computer science students could write Java
 | LinkedList         | Random                 | Scanner     |
 | Set                | Stack                  |             |
 
-## API
-
-### await jdk.init(root)
-
-- root (optional) path to the parent folder of the JS `jdk` folder, by default it is `./` you could also link to this package online 'https://unpkg.com/java2js'
-
-This function imports much of the standard Java lang classes into the global scope. You must use it before translating or running files.
-
-### await jdk.translate(javaFile)
-
-- javaFile is a string with contents of a Java file
-
-returns the Java file translated into JavaScript
-
-### jdk.load(translatedJSFile)
-
-- translatedJSFile is the translated JS class to run
-
-Loads the JS class file but doesn't run the main method.
-
-### jdk.run(jvmArgs)
-
-Runs the main method with optional JVM arguments.
-
 ## Features
+
+The java2js transpiler supports:
 
 - imports
 - static classes
@@ -71,6 +47,26 @@ Runs the main method with optional JVM arguments.
 - two dimensional arrays
 - lambda arrow functions
 - triple quotes
+
+## API
+
+### await jdk.init(root)
+
+This function imports the standard java.lang classes into the global scope. You must use it before translating or running files.
+
+- root (optional) path to the parent folder of the JS `jdk` folder, by default it is `.` (the current directory) you could also link to this package online 'https://unpkg.com/java2js'
+
+### await jdk.transpile(javaFile)
+
+Translates a Java class and loads it.
+
+- javaFile is a String with a Java class in it
+
+returns a String with the JavaScript transpilation of the Java class
+
+### jdk.run(jvmArgs)
+
+Runs the main method with optional JVM arguments.
 
 ## Known limitations
 
@@ -87,6 +83,14 @@ Runs the main method with optional JVM arguments.
 - no third level static classes
 
 - no method can be named `.length()` because it will be replaced with `.length` for getting the length of Strings in JS
+
+## Why did you make this?
+
+I created this package so intro level computer science students could write Java code but still use my [QuintOS](https://github.com/quinton-ashley/quintos) retro game engine library, which is web based.
+
+## Credits
+
+This project builds upon the [java-to-javascript](https://github.com/wyattades/java-to-javascript) transpiler by @wyattades. I also did a modern JS implementation of the fundamental classes in the JDK (Java Development Kit), which I got the inspiration to do from [java2javascript](https://github.com/java2script/java2script) by @BobHanson, @zhourenjian, @abego, and others.
 
 ## Contribute
 

@@ -48,7 +48,7 @@
 					constructor() {}
 
 					async init(root) {
-						this.root = root || './';
+						this.root = root || '.';
 						this.java = {};
 						let pkgs = ['com', 'io', 'lang', 'org', 'security', 'time', 'util'];
 						for (let pkg of pkgs) {
@@ -94,8 +94,10 @@
 						System.in.reset();
 						System.out.reset();
 
-						// stub main for now
-						this.main = () => {};
+						// stub main
+						this.main = () => {
+							console.error('No main method found in loaded classes!');
+						};
 					}
 
 					run(jvmArgs) {
@@ -152,7 +154,7 @@
 						return classes;
 					}
 
-					async translate(file) {
+					async transpile(file) {
 						if (!this.java) {
 							console.error(
 								'java2js error: JDK not initialized! You must call `await jdk.init()` before using `jdk.load()`'
@@ -216,11 +218,10 @@
 							return 'new Runnable("' + in0 + '")';
 						});
 
-						// convert string .length() method
-						file = file.replace(/\.length\(\)/gm, '.length');
-
 						// cast to int, truncates the number (just removes decimal value)
 						file = file.replace(/\(int\)\s*/gm, 'Math.floor');
+
+						let packageName = (file.match(/package\s+([^;]+)/gm) || [])[1] || 'default';
 
 						let trans = await java_to_javascript(file);
 
@@ -233,7 +234,7 @@
 
 						trans = trans.replace(/(\([^\(\)]*\) =>)/gm, 'async $1');
 
-						let prefix = `((jdk.imports['games_java.${className}'] = {}).load = async () => {\n\n`;
+						let prefix = `(jdk.imports['${packageName}.${className}'] = {}).load = async () => {\n\n`;
 
 						// handle Java class imports
 						for (let i = 0; i < imports.length; i++) {
@@ -252,17 +253,22 @@
 
 						let suffix = '\n';
 						suffix += `window.${className} = ${className};\n`;
-						suffix += '})();';
+						suffix += '};';
 
 						trans = prefix + trans + suffix;
 
-						return trans;
-					}
-
-					load(trans) {
 						const script = document.createElement('script');
 						script.innerHTML = trans;
 						document.body.appendChild(script);
+
+						try {
+							await jdk.imports[`${packageName}.${className}`].load();
+						} catch (ror) {
+							console.error('Failed to load class!\n' + trans);
+							return;
+						}
+
+						return trans;
 					}
 				}
 				window.jdk = new JDK();
@@ -19073,8 +19079,11 @@
 
 					const joinStatements = (stats) => `${stats.join(';')}${stats.length ? ';' : ''}`;
 
+					let variableTypes = {};
+
 					const varToString = ({ name, value, type, final }, noLet) => {
 						if (value === undefined) value = literalInitializers[type] || 'null';
+						variableTypes[name] = type;
 						return `${noLet !== true ? (final ? 'const ' : 'let ') : ''}${name} = ${value}`;
 					};
 
@@ -19108,27 +19117,16 @@
 						};
 						const classVarsMap = {};
 
-						let asyncMethods = [];
+						let asyncMethods = {
+							Scanner: ['next', 'nextLine', 'nextInt', 'nextShort', 'nextLong', 'nextFloat', 'nextDouble']
+						};
 						if (typeof QuintOS != 'undefined') {
-							// asyncMethods = {
-							// 	Sprite: ['move']
-							// };
-							asyncMethods = [
-								'alert',
-								'delay',
-								'erase',
-								'eraseRect',
-								'frame',
-								'move',
-								'play',
-								'print',
-								'println',
-								'printf',
-								'prompt',
-								'text',
-								'textRect'
-							];
+							Object.assign(asyncMethods, {
+								Sprite: ['move'],
+								window: ['alert', 'delay', 'erase', 'eraseRect', 'frame', 'play', 'prompt', 'text', 'textRect']
+							});
 						}
+						if (!asyncMethods.window) asyncMethods.window = [];
 
 						const assignParent = (name, isInConstructor) => {
 							if (name in classVarsMap) {
@@ -19195,12 +19193,19 @@
 									return `${parseExpr(expr.leftOperand)} ${op} ${parseExpr(expr.rightOperand)}`;
 								case 'MethodInvocation':
 									let str = '';
-									if (asyncMethods.includes(expr.name.identifier) && !expr.isInConstructor) {
-										str += 'await ';
-									}
 									if (expr.expression) {
+										let exp = expr.expression;
+										if (exp.expression) exp = exp.expression;
+										let arr = asyncMethods[variableTypes[exp.identifier]];
+										if (arr && arr.length && arr.includes(expr.name.identifier) && !expr.isInConstructor) {
+											str += 'await ';
+										}
 										str += `${parseExpr(expr.expression)}.${expr.name.identifier}`;
+										if (expr.name.identifier == 'length') return str;
 									} else {
+										if (asyncMethods.window.includes(expr.name.identifier) && !expr.isInConstructor) {
+											str += 'await ';
+										}
 										str += `${assignParent(expr.name.identifier)}`;
 									}
 									return str + `(${expr.arguments.map(parseExpr)})`;
@@ -19259,9 +19264,9 @@
 											data
 										)
 									);
+									variableTypes[frag.name.identifier] = data.type;
 								} else unhandledNode(frag);
 							}
-
 							return vars;
 						};
 
@@ -19344,7 +19349,7 @@
 								const arr = Array.isArray(str) ? str : [str];
 								statements.push(...arr.map(semicolon));
 								if (method && !method.isAsync && !method.constructor && statements.join('').includes('await')) {
-									asyncMethods.push(method.name.identifier);
+									asyncMethods.window.push(method.name.identifier);
 									method.isAsync = true;
 								}
 							}

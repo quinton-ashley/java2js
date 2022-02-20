@@ -3,9 +3,9 @@ jdk.imports['java.io.InputStream'].load = async () => {
 		constructor() {
 			this.reset();
 			let _this = this;
-			if (window?.ide) {
-				ide.log.onkeyup = () => {
-					_this.stream = ide.log.value;
+			if (jdk.log) {
+				jdk.log.onkeyup = () => {
+					_this.stream = jdk.log.value;
 				};
 			}
 		}

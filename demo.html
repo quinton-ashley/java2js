@@ -17,20 +17,35 @@
 			}
 
 			#javaFile {
-				width: 47vw;
-				height: 90vh;
+				width: 48vw;
+				height: 97vh;
 			}
 
 			#javaConsole {
-				width: 47vw;
-				height: 90vh;
+				width: 48vw;
+				height: 97vh;
+				float: right;
 			}
 		</style>
 	</head>
 
 	<body>
-		<textarea id="javaFile" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
-		<textarea id="javaConsole" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+		<textarea
+			id="javaFile"
+			spellcheck="false"
+			autocomplete="off"
+			autocorrect="off"
+			autocapitalize="off"
+			placeholder="Create a Java class with a main method here..."
+		></textarea>
+		<textarea
+			id="javaConsole"
+			spellcheck="false"
+			autocomplete="off"
+			autocorrect="off"
+			autocapitalize="off"
+			placeholder="Java console, click here to run!"
+		></textarea>
 
 		<script type="text/javascript" src="jdk.js"></script>
 		<script type="text/javascript" src="ide.js"></script>
