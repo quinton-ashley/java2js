@@ -2,7 +2,7 @@
 
 `java2js` can translate simple Java programs to JavaScript and runs them using a JavaScript based JDK.
 
-Try out the `demo.html` and `ide.js`, a barebones implementation.
+Try out the demo in the docs folder of this repository. `index.html` and `ide.js` are a barebones implementation.
 
 ## Java classes included in the java2js JDK
 
@@ -46,7 +46,7 @@ The java2js transpiler supports:
 - arrays with initial size
 - two dimensional arrays
 - lambda arrow functions
-- triple quotes
+- triple quote strings
 
 ## API
 
