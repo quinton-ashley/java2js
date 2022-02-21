@@ -1,8 +1,8 @@
 # Java to JavaScript (java2js)
 
-`java2js` can translate simple Java programs to JavaScript and runs them using a JavaScript based JDK.
+java2js can translate simple Java programs to JavaScript and runs them using a JavaScript based JDK.
 
-Try out the demo in the docs folder of this repository. `index.html` and `ide.js` are a barebones implementation.
+[Try it out!](https://quinton-ashley.github.io/java2js/) The demo files are located in the docs folder of this repository, its a barebones implementation that shows what is possible with java2js.
 
 ## Java classes included in the java2js JDK
 

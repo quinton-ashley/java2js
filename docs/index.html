@@ -7,6 +7,7 @@
 		<style>
 			body,
 			textarea {
+				display: flex;
 				background: #000;
 				color: #eee;
 			}
@@ -15,6 +16,20 @@
 				-moz-tab-size: 2;
 				-o-tab-size: 2;
 				tab-size: 2;
+			}
+
+			.mid {
+				cursor: pointer;
+				width: 2vw;
+				padding: 0.5vw;
+				background-repeat: repeat-y;
+			}
+
+			img,
+			p {
+				width: inherit;
+				text-align: center;
+				font-size: 2vw;
 			}
 
 			#javaFile {
@@ -39,6 +54,23 @@
 			autocapitalize="off"
 			placeholder="Create a Java class with a main method here..."
 		></textarea>
+		<div class="mid" onclick="location.href = 'https:\/\/github.com/quinton-ashley/java2js';">
+			<img src="favicon.ico" alt="" />
+			<p>j</p>
+			<img src="favicon.ico" alt="" />
+			<p>a</p>
+			<img src="favicon.ico" alt="" />
+			<p>v</p>
+			<img src="favicon.ico" alt="" />
+			<p>a</p>
+			<img src="favicon.ico" alt="" />
+			<p>2</p>
+			<img src="favicon.ico" alt="" />
+			<p>j</p>
+			<img src="favicon.ico" alt="" />
+			<p>s</p>
+			<img src="favicon.ico" alt="" />
+		</div>
 		<textarea
 			id="javaConsole"
 			spellcheck="false"
