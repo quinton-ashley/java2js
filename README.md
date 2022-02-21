@@ -54,7 +54,7 @@ The java2js transpiler supports:
 
 This function imports the standard java.lang classes into the global scope. You must use it before translating or running files.
 
-- root (optional) path to the parent folder of the JS `jdk` folder, by default it is `.` (the current directory) you could also link to this package online 'https://unpkg.com/java2js'
+- root (optional) path to the JS JDK folder, by default it is `./jdk` (the java2js JS JDK), for online use on codepen or similar code sharing sites you can use this link as the root path: 'https://unpkg.com/java2js/jdk'
 
 ### await jdk.transpile(javaFile)
 
@@ -95,3 +95,7 @@ This project builds upon the [java-to-javascript](https://github.com/wyattades/j
 ## Contribute
 
 I've only done a partial implementation of the Java 17 JDK in JavaScript, so if you're interested in adding more please go for it and submit a pull request!
+
+## Commercial Use
+
+This project is licensed under the copyleft GNU GENERAL PUBLIC LICENSE 3.0 (only) license. If you'd like to request legal permission to use this code in a commerical product or closed source project please email me (qashto@gmail.com) with a proposal of how you would like to use `java2js`.

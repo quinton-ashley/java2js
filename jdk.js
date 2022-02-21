@@ -48,7 +48,7 @@
 					constructor() {}
 
 					async init(root) {
-						this.root = root || '.';
+						this.root = root || './jdk';
 						this.java = {};
 						let pkgs = ['com', 'io', 'lang', 'org', 'security', 'time', 'util'];
 						for (let pkg of pkgs) {
@@ -129,7 +129,7 @@
 								imp.load = null;
 								imp.classPath = className.split('.');
 
-								let src = this.root + '/jdk';
+								let src = this.root;
 								for (let part of imp.classPath) {
 									src += '/' + part;
 								}
