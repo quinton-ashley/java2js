@@ -219,7 +219,7 @@
 						});
 
 						// cast to int, truncates the number (just removes decimal value)
-						file = file.replace(/\(int\)\s*/gm, 'Math.floor');
+						// file = file.replace(/\(int\)\s*/gm, 'Math.floor');
 
 						let packageName = (file.match(/package\s+([^;]+)/gm) || [])[1] || 'default';
 
@@ -265,6 +265,7 @@
 							await jdk.imports[`${packageName}.${className}`].load();
 						} catch (ror) {
 							console.error('Failed to load class!\n' + trans);
+							System.err.println('ERROR: Failed to load class');
 							return;
 						}
 
@@ -19167,14 +19168,44 @@
 									return expr.escapedValue.replace(/'/g, "\\'").replace(/"/g, "'");
 								case 'CharacterLiteral':
 									const char = expr.escapedValue.slice(1, -1);
-									// qashto: they were converting char to number here, no clue why??
 									if (char.length === 1) return "'" + char + "'";
 									else if (char.startsWith('\\u')) return parseInt(char.substring(2), 16).toString();
 									else return unhandledNode(expr, 'Weird char: ' + char);
-								// return expr.escapedValue.charCodeAt(1).toString(); // equivalent to: `'z'.charCodeAt(0)`
 								case 'CastExpression':
-									// TODO: use expr.type to convert?
-									return parseExpr(expr.expression);
+									let exp = parseExpr(expr.expression);
+									let type;
+									if (expr.expression.node == 'SimpleName') {
+										type = variableTypes[expr.expression.identifier];
+									} else if (expr.expression.node == 'CharacterLiteral') {
+										type = 'char';
+									} else if (expr.expression.node == 'NumberLiteral') {
+										type = 'double';
+									} else if (expr.expression.node == 'StringLiteral') {
+										type = 'String';
+									}
+									let castError = false;
+									let cast = expr.type.primitiveTypeCode;
+									if (cast == 'int') {
+										// if cast to int
+										if (type == 'char') {
+											exp += '.charCodeAt(0)';
+										} else if (/(double|float|short|long)/.test(type)) {
+											exp = 'Math.floor(' + exp + ')';
+										} else {
+											castError = true;
+										}
+									} else if (cast == 'char') {
+										if (/(double|float|short|long)/.test(type)) {
+											exp = 'String.fromCharCode(' + exp + ')';
+										} else {
+											castError = true;
+										}
+									}
+									if (castError) {
+										System.err.println(`error: incompatible types: ${type} cannot be converted to ${cast}: ${exp}`);
+										return '';
+									}
+									return exp;
 								case 'ConditionalExpression':
 									return `${parseExpr(expr.expression)} ? ${parseExpr(expr.thenExpression)} : ${parseExpr(
 										expr.elseExpression

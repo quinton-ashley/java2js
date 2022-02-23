@@ -40,6 +40,7 @@ java2js can translate simple Java programs to JavaScript and runs them using a J
 The java2js transpiler supports:
 
 - imports
+- primitive type casting
 - static classes
 - static methods
 - array literals
@@ -54,25 +55,25 @@ The java2js transpiler supports:
 
 This function imports the standard java.lang classes into the global scope. You must use it before translating or running files.
 
-- root (optional) path to the JS JDK folder, by default it is `./jdk` (the java2js JS JDK), for online use on codepen or similar code sharing sites you can use this link as the root path: 'https://unpkg.com/java2js/jdk'
+- root: (optional) path to the JS JDK folder, by default it is `./jdk` (the java2js JS JDK), for online use on codepen or similar code sharing sites you can use this link as the root path: 'https://unpkg.com/java2js/jdk'
 
 ### await jdk.transpile(javaFile)
 
 Translates a Java class and loads it.
 
-- javaFile is a String with a Java class in it
+- javaFile: a String with a Java class in it
 
 returns a String with the JavaScript transpilation of the Java class
 
 ### jdk.run(jvmArgs)
 
-Runs the main method with optional JVM arguments.
+Runs the main method
+
+- jvmArgs: (optional) String array of JVM arguments.
 
 ## Known limitations
 
 - not very good error reporting
-
-- casting to int (truncation) requires parenthesis around the number being cast `int x = (int) (Math.random() * 100);`
 
 - no support for method overloading, though a workaround might be possible by making a function with the og name route to each of the variations of the overloaded function
 

@@ -7,6 +7,7 @@ jdk.imports['java.lang.System'].load = async () => {
 
 	System.in = new InputStream();
 	System.out = new PrintStream();
+	System.err = System.out;
 	System.out.onPrint = (length) => {
 		System.in.mark += length;
 	};
