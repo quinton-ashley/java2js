@@ -218,9 +218,6 @@
 							return 'new Runnable("' + in0 + '")';
 						});
 
-						// cast to int, truncates the number (just removes decimal value)
-						// file = file.replace(/\(int\)\s*/gm, 'Math.floor');
-
 						let packageName = (file.match(/package\s+([^;]+)/gm) || [])[1] || 'default';
 
 						let trans = await java_to_javascript(file);
@@ -19187,22 +19184,24 @@
 									let cast = expr.type.primitiveTypeCode;
 									if (cast == 'int') {
 										// if cast to int
-										if (type == 'char') {
-											exp += '.charCodeAt(0)';
-										} else if (/(double|float|short|long)/.test(type)) {
-											exp = 'Math.floor(' + exp + ')';
-										} else {
+										if (type == 'String') {
 											castError = true;
+										} else if (type == 'char') {
+											exp += '.charCodeAt(0)';
+										} else {
+											exp = 'Math.floor(' + exp + ')';
 										}
 									} else if (cast == 'char') {
-										if (/(double|float|short|long)/.test(type)) {
-											exp = 'String.fromCharCode(' + exp + ')';
-										} else {
+										if (type == 'String') {
 											castError = true;
+										} else {
+											exp = 'String.fromCharCode(' + exp + ')';
 										}
 									}
 									if (castError) {
-										System.err.println(`error: incompatible types: ${type} cannot be converted to ${cast}: ${exp}`);
+										let msg = `error: incompatible types: ${type} cannot be converted to ${cast}: ${exp}`;
+										console.log(msg);
+										System.err.println(msg);
 										return '';
 									}
 									return exp;
