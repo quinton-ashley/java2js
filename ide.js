@@ -1,6 +1,6 @@
 (async () => {
 	jdk.log = document.getElementById('javaConsole');
-	await jdk.init('../jdk');
+	await jdk.init('./jdk');
 
 	let file0 = document.getElementById('javaFile');
 	file0.onchange = async () => {

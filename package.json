@@ -1,6 +1,6 @@
 {
 	"name": "java2js",
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"description": "Converts Java to JavaScript and runs it with a JS JDK",
 	"main": "jdk.js",
 	"scripts": {
