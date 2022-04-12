@@ -171,7 +171,7 @@
 						let imports = file.slice(0, classLine);
 						imports = imports.match(/(?<=^import )[^;]*/gm) || [];
 
-						let className = file.slice(classLine + 13, file.indexOf(' {', classLine + 13));
+						let className = file.slice(classLine + 13, file.indexOf('{', classLine + 13));
 
 						// workaround hack for converting triple quotes to a normal string
 						file = file.replace(/"""([^"]*)"""/gm, (match, p1) => {

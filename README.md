@@ -6,28 +6,28 @@ java2js can translate simple Java programs to JavaScript and runs them using a J
 
 ## Java classes included in the java2js JDK
 
-| java.io |             |             |
-| ------- | ----------- | ----------- |
-| File    | InputStream | PrintStream |
+| `java.io` |             |             |
+| :-------- | ----------- | ----------- |
+| File      | InputStream | PrintStream |
 
-| java.lang |               |           |
-| --------- | ------------- | --------- |
-| Boolean   | Byte          | Character |
-| Double    | Exception     | Float     |
-| Integer   | Long          | Short     |
-| String    | StringBuilder | System    |
-| Thread    | Throwable     |           |
+| `java.lang` |               |           |
+| :---------- | ------------- | --------- |
+| Boolean     | Byte          | Character |
+| Double      | Exception     | Float     |
+| Integer     | Long          | Short     |
+| String      | StringBuilder | System    |
+| Thread      | Throwable     |           |
 
-| java.security |     |     |
-| ------------- | --- | --- |
-| MessageDigest |     |     |
+| `java.security` |
+| :-------------- |
+| MessageDigest   |
 
-| java.time |     |     |
-| --------- | --- | --- |
-| Instant   |     |     |
+| `java.time` |
+| :---------- |
+| Instant     |
 
-| java.util          |                        |             |
-| ------------------ | ---------------------- | ----------- |
+| `java.util`        |                        |             |
+| :----------------- | ---------------------- | ----------- |
 | AbstractCollection | AbstractList           | AbstractMap |
 | AbstractSet        | ArrayList              | Arrays      |
 | Collections        | Formatter              | HashMap     |
@@ -48,6 +48,7 @@ The java2js transpiler supports:
 - two dimensional arrays
 - lambda arrow functions
 - triple quote strings
+- try/catch blocks
 
 ## API
 
@@ -55,7 +56,7 @@ The java2js transpiler supports:
 
 This function imports the standard java.lang classes into the global scope. You must use it before translating or running files.
 
-- root: (optional) path to the JS JDK folder, by default it is `./jdk` (the java2js JS JDK), for online use on codepen or similar code sharing sites you can use this link as the root path: 'https://unpkg.com/java2js/jdk'
+- root: (optional) path to the JS JDK folder, by default it is `./jdk` (the java2js JS JDK), for online use on codepen or similar code sharing sites you can use this link as the root path: 'https://quinton-ashley.github.io/java2js/jdk'
 
 ### await jdk.transpile(javaFile)
 

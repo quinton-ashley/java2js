@@ -1,11 +1,11 @@
 {
 	"name": "java2js",
-	"version": "1.2.4",
+	"version": "1.2.5",
 	"description": "Converts Java to JavaScript and runs it with a JS JDK",
 	"main": "jdk.js",
 	"scripts": {
-		"start": "open demo.html",
-		"test": "open demo.html",
+		"start": "open index.html",
+		"test": "open index.html",
 		"v": "npm version patch --force",
 		"V": "npm version minor --force",
 		"version": "git add -A",

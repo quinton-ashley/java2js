@@ -32,7 +32,7 @@ jdk.imports['java.util.Scanner'].load = async () => {
 			return await this.next(/.*\n/);
 		}
 		async next(pattern) {
-			while (this._loading || !this.hasNext(pattern)) {
+			while (this._loading || !(await this.hasNext(pattern))) {
 				await new Promise((done) => setTimeout(() => done(), 100));
 			}
 			let buf = this.in.stream.slice(this.in.mark);
