@@ -1,29 +1,38 @@
 jdk.imports['java.util.Scanner'].load = async () => {
-	const File = await jdk.import('java.io.File');
+	const InputStream = await jdk.import('java.io.InputStream');
 
 	class Scanner {
 		constructor(input) {
-			if (input instanceof File) {
-				this.inputType = 'File';
-				throw 'unsupported Scanner input type: File';
+			if (input.getAbsolutePath) {
+				this._loading = true;
+				this._filePath = input.getAbsolutePath();
+				return;
 			}
 			this.in = input;
 		}
-		hasNext(pattern) {
+		async _loadFile(filePath) {
+			this.in = new InputStream();
+			this.in.stream = await (await fetch(filePath)).text();
+			this._loading = false;
+		}
+		async hasNext(pattern) {
+			if (this._loading) {
+				await this._loadFile(this._filePath);
+			}
 			if (pattern instanceof RegExp) {
 				return pattern.test(this.in.stream.slice(this.in.mark));
 			}
 			// if pattern is string
-			return this.in.stream.includes(pattern);
+			return this.in.stream.slice(this.in.mark).includes(pattern);
 		}
-		hasNextLine() {
+		async hasNextLine() {
 			return this.hasNext('\n');
 		}
 		async nextLine() {
 			return await this.next(/.*\n/);
 		}
 		async next(pattern) {
-			while (!this.hasNext(pattern)) {
+			while (this._loading || !this.hasNext(pattern)) {
 				await new Promise((done) => setTimeout(() => done(), 100));
 			}
 			let buf = this.in.stream.slice(this.in.mark);

@@ -12,6 +12,10 @@ jdk.imports['java.lang.System'].load = async () => {
 		System.in.mark += length;
 	};
 
+	System.getProperty = (prop) => {
+		return '';
+	};
+
 	System.arraycopy = (src, srcPos, dest, destPos, numElements) => {
 		if (
 			(dest instanceof Float64Array || dest instanceof Int32Array) &&

@@ -229,6 +229,8 @@
 							return '() => {' + p1.replaceAll('\\n', '\n') + '}';
 						});
 
+						trans.replace(/catch \(\w*/gm, 'catch (');
+
 						trans = trans.replace(/(\([^\(\)]*\) =>)/gm, 'async $1');
 
 						let prefix = `(jdk.imports['${packageName}.${className}'] = {}).load = async () => {\n\n`;
@@ -250,6 +252,7 @@
 
 						let suffix = '\n';
 						suffix += `window.${className} = ${className};\n`;
+						suffix += `console.log("loaded ${className}.java");\n`;
 						suffix += '};';
 
 						trans = prefix + trans + suffix;
@@ -19116,7 +19119,17 @@
 						const classVarsMap = {};
 
 						let asyncMethods = {
-							Scanner: ['next', 'nextLine', 'nextInt', 'nextShort', 'nextLong', 'nextFloat', 'nextDouble']
+							Scanner: [
+								'hasNext',
+								'hasNextLine',
+								'next',
+								'nextLine',
+								'nextInt',
+								'nextShort',
+								'nextLong',
+								'nextFloat',
+								'nextDouble'
+							]
 						};
 						if (typeof QuintOS != 'undefined') {
 							Object.assign(asyncMethods, {
