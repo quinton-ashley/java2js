@@ -66,6 +66,7 @@
 							let names = [
 								'Character',
 								'Double',
+								'Exception',
 								'Float',
 								'Integer',
 								'Long',
@@ -19129,12 +19130,13 @@
 								'nextLong',
 								'nextFloat',
 								'nextDouble'
-							]
+							],
+							Thread: ['sleep']
 						};
 						if (typeof QuintOS != 'undefined') {
 							Object.assign(asyncMethods, {
 								Sprite: ['move'],
-								window: ['alert', 'delay', 'erase', 'eraseRect', 'frame', 'play', 'prompt', 'text', 'textRect']
+								window: ['alert', 'delay', 'eraseRect', 'frame', 'play', 'prompt', 'text', 'textRect']
 							});
 						}
 						if (!asyncMethods.window) asyncMethods.window = [];

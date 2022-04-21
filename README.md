@@ -16,7 +16,7 @@ java2js can translate simple Java programs to JavaScript and runs them using a J
 | Double      | Exception     | Float     |
 | Integer     | Long          | Short     |
 | String      | StringBuilder | System    |
-| Thread      | Throwable     |           |
+| Thread      |               |           |
 
 | `java.security` |
 | :-------------- |

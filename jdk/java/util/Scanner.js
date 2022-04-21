@@ -25,37 +25,40 @@ jdk.imports['java.util.Scanner'].load = async () => {
 			// if pattern is string
 			return this.in.stream.slice(this.in.mark).includes(pattern);
 		}
-		async hasNextLine() {
+		hasNextLine() {
 			return this.hasNext('\n');
 		}
-		async nextLine() {
-			return await this.next(/.*\n/);
+		nextLine() {
+			return this.next(/.*/);
 		}
 		async next(pattern) {
 			while (this._loading || !(await this.hasNext(pattern))) {
-				await new Promise((done) => setTimeout(() => done(), 100));
+				await new Promise((resolve) => setTimeout(resolve, 100));
 			}
 			let buf = this.in.stream.slice(this.in.mark);
 			let substr = buf.match(pattern)[0];
 			let start = buf.indexOf(substr);
 			let end = buf.indexOf('\n');
+			if (end == -1) {
+				throw 'NoSuchElementException: No ' + pattern.toString() + ' found in buffer ' + buf;
+			}
 			this.in.read(end - start + 1);
-			return buf.slice(start, end);
+			return buf.slice(start, substr.length);
 		}
-		async nextShort() {
-			return await this.nextInt();
+		nextShort() {
+			return this.nextInt();
 		}
 		async nextInt() {
-			return Number(await this.next(/\d+\D/));
+			return Number(await this.next(/\d+/));
 		}
-		async nextLong() {
-			return await this.nextInt();
+		nextLong() {
+			return this.nextInt();
 		}
 		async nextFloat() {
-			return Number(await this.next(/[0-9\.]+[^0-9\.]/));
+			return Number(await this.next(/[0-9\.]+/));
 		}
-		async nextDouble() {
-			return await this.nextFloat();
+		nextDouble() {
+			return this.nextFloat();
 		}
 		close() {}
 	}
