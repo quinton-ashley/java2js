@@ -1,5 +1,6 @@
 jdk.imports['java.util.Scanner'].load = async () => {
 	const InputStream = await jdk.import('java.io.InputStream');
+	const FileNotFoundException = await jdk.import('java.io.FileNotFoundException');
 
 	class Scanner {
 		constructor(input) {
@@ -12,7 +13,11 @@ jdk.imports['java.util.Scanner'].load = async () => {
 		}
 		async _loadFile(filePath) {
 			this.in = new InputStream();
-			this.in.stream = await (await fetch(filePath)).text();
+			let data = await fetch(filePath);
+			if (data.status == 404 || data.status == 403) {
+				throw new FileNotFoundException(filePath);
+			}
+			this.in.stream = await data.text();
 			this._loading = false;
 		}
 		async hasNext(pattern) {
