@@ -10,6 +10,11 @@ jdk.imports['java.util.Collections'].load = async () => {
 		}
 	};
 
+	Collections.shuffle = (list) => {
+		if (!list.size()) return;
+		list.sort(() => Math.random() - 0.5);
+	};
+
 	Collections.swap = (list, i, j) => {
 		const l = list;
 		l.set(i, l.set(j, l.get(i)));
