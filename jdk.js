@@ -233,6 +233,9 @@
 									trans = e.data;
 									resolve();
 								};
+								worker.onerror = (e) => {
+									reject(e);
+								};
 							});
 						} else {
 							console.warn(
