@@ -49,6 +49,9 @@
 
 					async init(root) {
 						this.root = root || './jdk';
+						if (location.hostname == 'localhost' || location.hostname == '127.0.0.1') {
+							this.workerPath = this.root.split('/').slice(0, -1).join('/') + '/java2js_transpile_worker.js';
+						}
 						this.java = {};
 						let pkgs = ['com', 'io', 'lang', 'org', 'security', 'time', 'util'];
 						for (let pkg of pkgs) {
@@ -222,10 +225,8 @@
 						let packageName = (file.match(/package\s+([^;]+)/gm) || [])[1] || 'default';
 
 						let trans;
-
-						let workerPath = this.root.split('/').slice(0, -1).join('/') + '/transpile_worker.js';
-						try {
-							let worker = new Worker(workerPath);
+						if (this.workerPath) {
+							let worker = new Worker(this.workerPath);
 							worker.postMessage(file);
 							await new Promise((resolve, reject) => {
 								worker.onmessage = (e) => {
@@ -233,9 +234,9 @@
 									resolve();
 								};
 							});
-						} catch (ror) {
+						} else {
 							console.warn(
-								'Due to a likely CORS error, java2js was unable to transpile with multithreaded worker: ' + workerPath
+								"If you'd like java2js to transpile with the multithreaded worker (faster), due to CORS security block 'jav2js_transpile_worker.js' must be loaded from your own domain"
 							);
 							trans = java_to_javascript(file);
 						}
