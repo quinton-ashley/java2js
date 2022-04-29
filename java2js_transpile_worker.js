@@ -39,7 +39,7 @@
 				const java_to_javascript = require('java-to-javascript');
 				self.addEventListener('message', (e) => {
 					if (e.data == 'QuintOS') {
-						window.QuintOS = true;
+						QuintOS = true;
 						return;
 					}
 					self.postMessage(java_to_javascript(e.data));
