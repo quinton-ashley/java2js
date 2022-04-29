@@ -72,6 +72,12 @@ Runs the main method
 
 - jvmArgs: (optional) String array of JVM arguments.
 
+### jdk.workerPath
+
+java2js might cause the main thread to stall when transpiling a large Java file. This can cause your website to appear unresponsive/frozen. You can (optionally) utilize the java2js worker script to transpile Java asynchronously in a seperate JS thread. However due to CORS security 'jav2js_worker.js' must be hosted on your own domain, define 'jdk.workerPath' to be the location of that file.
+
+By default workerPath is undefined unless you are using java2js on a local server, in that case workerPath is the parent folder of jdk.root
+
 ## Known limitations
 
 - not very good error reporting

@@ -50,7 +50,7 @@
 					async init(root) {
 						this.root = root || './jdk';
 						if (location.hostname == 'localhost' || location.hostname == '127.0.0.1') {
-							this.workerPath = this.root.split('/').slice(0, -1).join('/') + '/java2js_transpile_worker.js';
+							this.workerPath = this.root.split('/').slice(0, -1).join('/') + '/java2js_worker.js';
 						}
 						this.java = {};
 						let pkgs = ['com', 'io', 'lang', 'org', 'security', 'time', 'util'];
@@ -240,7 +240,7 @@
 							});
 						} else {
 							console.warn(
-								"If you'd like java2js to transpile with the multithreaded worker (faster), due to CORS security block 'jav2js_transpile_worker.js' must be loaded from your own domain"
+								"java2js might cause the main thread to stall when transpiling a large Java file. This can cause your website to appear unresponsive/frozen. You can utilize the java2js worker script to transpile Java asynchronously in a seperate JS thread. However due to CORS security 'jav2js_worker.js' must be hosted on your own domain, define 'jdk.workerPath' to be the location of that file."
 							);
 							trans = java_to_javascript(file);
 						}
