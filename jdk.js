@@ -227,6 +227,7 @@
 						let trans;
 						if (this.workerPath) {
 							let worker = new Worker(this.workerPath);
+							if (typeof QuintOS != 'undefined') worker.postMessage('QuintOS');
 							worker.postMessage(file);
 							await new Promise((resolve, reject) => {
 								worker.onmessage = (e) => {
