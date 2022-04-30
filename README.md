@@ -94,7 +94,7 @@ By default workerPath is undefined unless you are using java2js on a local serve
 
 ## Why did you make this?
 
-I created this package so intro level computer science students could write Java code but still use my [QuintOS](https://github.com/quinton-ashley/quintos) retro game engine library, which is web based.
+I created this package so intro level computer science students could write Java code but still use my [QuintOS](https://quintos.org) retro game engine library, which is web based.
 
 ## Credits
 
