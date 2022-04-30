@@ -1,6 +1,7 @@
 (async () => {
 	jdk.log = document.getElementById('javaConsole');
 	await jdk.init('./jdk');
+	jdk.workerPath = 'java2js/java2js_worker.js';
 
 	async function run() {
 		jdk.log.value = '';
