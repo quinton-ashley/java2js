@@ -95,9 +95,6 @@
 							window[name] = this.java.lang[name];
 						}
 
-						System.in.reset();
-						System.out.reset();
-
 						// stub main
 						this.main = () => {
 							console.error('No main method found in loaded classes!');
@@ -105,6 +102,10 @@
 					}
 
 					run(jvmArgs) {
+						// reset
+						System.in.reset();
+						System.out.reset();
+
 						this.main(jvmArgs);
 					}
 

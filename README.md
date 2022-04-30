@@ -1,6 +1,6 @@
 # Java to JavaScript (java2js)
 
-java2js can translate simple Java programs to JavaScript and runs them using a JavaScript based JDK.
+java2js can translate simple Java programs to JavaScript and runs them using a JavaScript based JDK in the browser without the use of a VM on a server.
 
 [Try it out!](https://quinton-ashley.github.io/java2js/) The demo files are located in the docs folder of this repository, its a barebones implementation that shows what is possible with java2js.
 

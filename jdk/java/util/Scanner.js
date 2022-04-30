@@ -24,29 +24,31 @@ jdk.imports['java.util.Scanner'].load = async () => {
 			if (this._loading) {
 				await this._loadFile(this._filePath);
 			}
+			let s = this.in.stream.slice(this.in.mark);
+			if (!s) return;
 			if (pattern instanceof RegExp) {
-				return pattern.test(this.in.stream.slice(this.in.mark));
+				return pattern.test(s);
 			}
 			// if pattern is string
-			return this.in.stream.slice(this.in.mark).includes(pattern);
+			return s.includes(pattern);
 		}
 		hasNextLine() {
 			return this.hasNext('\n');
 		}
 		nextLine() {
-			return this.next(/.*/);
+			return this.next(/(.*)\r*\n/);
 		}
 		async next(pattern) {
 			while (this._loading || !(await this.hasNext(pattern))) {
 				await new Promise((resolve) => setTimeout(resolve, 100));
 			}
 			let buf = this.in.stream.slice(this.in.mark);
-			let substr = buf.match(pattern)[0];
-			let start = buf.indexOf(substr);
 			let end = buf.indexOf('\n');
-			if (end == -1) {
+			let substr = buf.match(pattern)[1];
+			if (!substr || end == -1) {
 				throw 'NoSuchElementException: No ' + pattern.toString() + ' found in buffer ' + buf;
 			}
+			let start = buf.indexOf(substr);
 			this.in.read(end - start + 1);
 			return buf.slice(start, substr.length);
 		}
@@ -54,13 +56,13 @@ jdk.imports['java.util.Scanner'].load = async () => {
 			return this.nextInt();
 		}
 		async nextInt() {
-			return Number(await this.next(/\d+/));
+			return Number(await this.next(/(\d+)\r*\n/));
 		}
 		nextLong() {
 			return this.nextInt();
 		}
 		async nextFloat() {
-			return Number(await this.next(/[0-9\.]+/));
+			return Number(await this.next(/([0-9\.]+)\r*\n/));
 		}
 		nextDouble() {
 			return this.nextFloat();
