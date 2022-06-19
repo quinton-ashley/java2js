@@ -189,7 +189,8 @@
 						file = file.replace(/new\s*\w*\s*\[\s*\]\s*\{([^}]*)}/gm, 'Array.of($1)');
 
 						// 2D arrays
-						file = file.replace(/new\s*\w*(\s*\[\s*\])*\s*\{([^}]*)\}/gm, (match, p1, p2) => {
+						file = file.replace(/new\s*\w*(\s*\[\s*\])*\s*\{([^;]*)/gm, (match, p1, p2) => {
+							p2 = p2.slice(0, -1);
 							return 'Array.of(' + p2.replace(/\{([^\}]*)\}/gm, 'Array.of($1)') + ')';
 						});
 
@@ -204,10 +205,10 @@
 						// 	// log(in0);
 						// 	if (lambdaRegex.test(in0)) {
 						// 		in0 = in0.replace(lambdaRegex, (match, in1) => {
-						// 			return 'new Runnable() {\\n@Override\\npublic void run() {' + in1 + '}\\n}';
+						// 			return 'new Runnable() {\n@Override\npublic void run() {' + in1 + '}\n}';
 						// 		});
 						// 	}
-						// 	return 'new Runnable() {\\n@Override\\npublic void run() {' + in0 + '}\\n}';
+						// 	return 'new Runnable() {\n@Override\npublic void run() {' + in0 + '}\n}';
 						// });
 
 						// TODO fix this by adding real support for lambda
@@ -215,15 +216,17 @@
 							// log(in0);
 							if (lambdaRegex.test(in0)) {
 								in0 = in0.replace(lambdaRegex, (match, in1) => {
-									in1.replaceAll('\n', '\\n');
-									return 'new Runnable("' + in1 + '")';
+									// in1.replaceAll('\n', '\\n');
+									return '"");\n' + in1 + '\n"";//';
 								});
 							}
-							in0 = in0.replaceAll('\n', '\\n');
-							return 'new Runnable("' + in0 + '")';
+							// in0 = in0.replaceAll('\n', '\\n');
+							return '"");\n' + in0 + '\n"";//';
 						});
 
 						let packageName = (file.match(/package\s+([^;]+)/gm) || [])[1] || 'default';
+
+						log(file);
 
 						let trans;
 						if (this.workerPath) {
@@ -241,15 +244,15 @@
 							});
 						} else {
 							console.warn(
-								"java2js might cause the main thread to stall when transpiling a large Java file. This can cause your website to appear unresponsive/frozen. You can utilize the java2js worker script to transpile Java asynchronously in a seperate JS thread. However due to CORS security 'jav2js_worker.js' must be hosted on your own domain, define 'jdk.workerPath' to be the location of that file."
+								"java2js might cause the main thread to stall when transpiling a large Java file. This can cause your website to appear unresponsive/frozen. You can utilize the java2js worker script to transpile Java asynchronously in a separate JS thread. However due to CORS security 'jav2js_worker.js' must be hosted on your own domain, define 'jdk.workerPath' to be the location of that file."
 							);
 							trans = java_to_javascript(file);
 						}
 						// log(trans);
 
 						// TODO fix this by adding real support for lambda
-						trans = trans.replace(/new\s*Runnable\('([^]*)'\)/gm, (match, p1) => {
-							return '() => {' + p1.replaceAll('\\n', '\n') + '}';
+						trans = trans.replace(/''\);([^]*)';/gm, (match, p1) => {
+							return '() => {' + p1.slice(0, -1) + '});';
 						});
 
 						trans.replace(/catch \(\w*/gm, 'catch (');
