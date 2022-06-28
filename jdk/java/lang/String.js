@@ -34,4 +34,12 @@ jdk.imports['java.lang.String'].load = async () => {
 		return new Formatter().format(format, ...args);
 	};
 	jdk.java.lang.String = String;
+
+	Number.prototype.toUpperCase = function () {
+		return this + '';
+	};
+
+	Number.prototype.toLowerCase = function () {
+		return this + '';
+	};
 };
