@@ -178,6 +178,8 @@
 
 						let className = file.slice(classLine + 13, file.indexOf('{', classLine + 13));
 
+						file = file.replaceAll(/\s+{/gm, ' {');
+
 						// workaround hack for converting triple quotes to a normal string
 						file = file.replace(/"""([^"]*)"""/gm, (match, p1) => {
 							return '(' + p1.replace(/(  |\t){0,3}(.*)(\r*\n|$)/gm, '"$2\\n"+').slice(0, -1) + ')';
