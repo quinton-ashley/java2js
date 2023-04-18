@@ -165,6 +165,9 @@
 								'java2js error: JDK not initialized! You must call `await jdk.init()` before using `jdk.load()`'
 							);
 						}
+
+						file = file.replaceAll(/\s+{/gm, ' {');
+
 						// bodge fix to avoid getting the index of a commented out class
 						// (only works with normal comments)
 						let classLine = file.indexOf('\npublic class');
@@ -177,8 +180,6 @@
 						imports = imports.match(/(?<=^import )[^;]*/gm) || [];
 
 						let className = file.slice(classLine + 13, file.indexOf('{', classLine + 13));
-
-						file = file.replaceAll(/\s+{/gm, ' {');
 
 						// workaround hack for converting triple quotes to a normal string
 						file = file.replace(/"""([^"]*)"""/gm, (match, p1) => {
