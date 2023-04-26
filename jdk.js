@@ -198,7 +198,7 @@
 						});
 
 						// Array with defined length
-						file = file.replace(/new\s*\w*\s*\[\s*(\d)+\s*\]\s*/gm, 'new Array($1)');
+						file = file.replace(/new\s*\w*\s*\[\s*(\d)+\s*\]\s*/gm, 'new Array($1).fill(undefined)');
 
 						// workaround hack for converting lambda expressions to Runnables
 						let lambdaRegex = /\(\)\s*\->\s*\{(([^\{\}]*\{[^\}]*\})*[^\}]*)\}/g;
